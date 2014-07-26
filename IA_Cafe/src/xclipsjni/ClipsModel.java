@@ -3,7 +3,8 @@ package xclipsjni;
 import java.util.Observable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import monitor1213.DebugFrame;
+
+import robotcafe.DebugFrame;
 
 /**Questa classe astratta è la parte di model (in un'architettura MVC) che si interfaccia e mantiene con i dati.
  * Nella fattispecie, le implentazioni di questa classe dovranno mantenere copie

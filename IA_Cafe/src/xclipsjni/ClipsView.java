@@ -2,8 +2,10 @@ package xclipsjni;
 
 import java.util.Observable;
 import java.util.Observer;
+
 import javax.swing.JPanel;
-import monitor1213.DebugFrame;
+
+import robotcafe.DebugFrame;
 
 /**Questa classe astratta è la parte di view (in un'architettura MVC) e implementa Observer,
  * per osservare il model (i.e. ClipsModel).

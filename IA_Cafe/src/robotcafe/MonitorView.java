@@ -1,4 +1,4 @@
-package monitor1213;
+package robotcafe;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -52,7 +52,7 @@ public class MonitorView extends ClipsView implements Observer {
     private ControlPanel cp_frame; //Effettivo frame (classe ControlPanel)
     
     //Modificabile dall'interfaccia
-    private int verbose_mode = Verbosity_MEDIUM;
+    private int verbose_mode = Verbosity_HIGH;
     
     PrintOutWindow outputFrame;
     
