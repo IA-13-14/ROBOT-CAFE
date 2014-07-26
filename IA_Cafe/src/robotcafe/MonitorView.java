@@ -156,7 +156,7 @@ public class MonitorView extends ClipsView implements Observer {
         view.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         view.setSize(new Dimension(689, 160));
         view.setResizable(true);
-        view.setTitle("Waitor");
+        view.setTitle("Waiter-Bot");
         view.setLayout(new BorderLayout());
         cp_frame = createControlPanel(model);
         cp_JPanel = cp_frame.getControlPanel();

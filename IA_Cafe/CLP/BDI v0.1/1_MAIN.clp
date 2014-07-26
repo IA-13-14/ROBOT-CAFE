@@ -11,7 +11,7 @@
             (slot time (default ?NONE)) 
             (slot step (default ?NONE))
             (slot source (type STRING) (default ?NONE)) 
-            (slot verbosity (type INTEGER) (allowed-integers 0 1 2) (default 0))  ;Tre livelli di verbositÃ 
+            (slot verbosity (type INTEGER) (allowed-integers 0 1 2) (default 0))  ;Tre livelli di verbositÃ 
             (slot text (type STRING)) 
             (slot param1 (default ""))
             (slot param2 (default ""))

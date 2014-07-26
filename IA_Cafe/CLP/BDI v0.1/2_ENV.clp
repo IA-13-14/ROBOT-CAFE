@@ -1758,7 +1758,7 @@
 			(perc7 ?x7) (perc8 ?x8) (perc9 ?x9)
 		)
 	)
-	(focus MAIN)
+	(pop-focus)
 )
 
 (defrule percept-south
@@ -1781,7 +1781,7 @@
 			(perc7 ?x7) (perc8 ?x8) (perc9 ?x9)
 		)
 	)
-	(focus MAIN)
+	(pop-focus)
 )
 
 (defrule percept-east
@@ -1804,7 +1804,7 @@
 			(perc7 ?x7) (perc8 ?x8) (perc9 ?x9)
 		)
 	)
-	(focus MAIN)
+	(pop-focus)
 )
 
 (defrule percept-west
@@ -1827,5 +1827,5 @@
 			(perc7 ?x7) (perc8 ?x8) (perc9 ?x9)
 		)
 	)
-	(focus MAIN)
+	(pop-focus)
 )

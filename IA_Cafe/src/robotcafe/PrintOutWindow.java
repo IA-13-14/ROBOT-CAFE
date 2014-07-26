@@ -47,6 +47,7 @@ public class PrintOutWindow extends javax.swing.JFrame {
         sources.put("AGENT", Color.blue);
         sources.put("PLANNER", Color.darkGray);
         sources.put("ENV", Color.decode("#32CD32"));
+        sources.put("AGENT::UPDATER-BEL", Color.PINK);
         
         table = new Hashtable<>();
         table.put(0, new JLabel("Low"));
@@ -299,13 +300,17 @@ public class PrintOutWindow extends javax.swing.JFrame {
         try {
            Document doc = output.getDocument();
            SimpleAttributeSet keyWord = new SimpleAttributeSet();
-           StyleConstants.setForeground(keyWord, sources.get(color));
+           if(sources.get(color)==null)
+        	   StyleConstants.setForeground(keyWord, Color.BLACK);
+           else
+        	   StyleConstants.setForeground(keyWord, sources.get(color));
 
             //StyleConstants.setBackground(keyWord, color);
            
            doc.insertString(doc.getLength(), s+"\n", keyWord);
             output.setCaretPosition(output.getDocument().getLength());
-        } catch(BadLocationException exc) {
+        } catch(Exception exc) {
+        	System.out.println("[ERROR]: Cannot log print GUI ("+s+") "+ exc);
         }
      }
     

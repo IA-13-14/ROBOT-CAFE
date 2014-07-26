@@ -1,7 +1,6 @@
 ;// AGENT
 
-
-(defmodule AGENT (import MAIN ?ALL))
+(defmodule AGENT (import MAIN ?ALL) (export ?ALL))
 
 ;#####  required for GUI #####
 (deftemplate init-agent (slot done (allowed-values yes no))) ; Ci dice se l'inizializzazione dell'agente è conclusa
@@ -12,8 +11,10 @@
 ;END -- #####  required for GUI #####
 
 (deftemplate K-cell  (slot pos-r) (slot pos-c) 
-                   (slot contains (allowed-values Wall Person  Empty Parking Table Seat TrashBasket
-                                                      RecyclableBasket DrinkDispenser FoodDispenser)))
+                     (slot contains (allowed-values Wall Person  Empty Parking Table Seat TrashBasket
+                                                      RecyclableBasket DrinkDispenser FoodDispenser))
+                     (slot initial (type SYMBOL) (allowed-symbols no yes) (default no)) ;campo per distinguere i dati iniziali dalle future percezioni temporanee
+)
 
 (deftemplate K-agent
 	(slot step)
@@ -28,6 +29,16 @@
 )
 
 
+;### DESIRES Template ###
+(deftemplate desire
+    (slot step)
+    (slot time)
+    (slot table)
+    (slot type (allowed-values order clean))
+    (slot param1 (default NA))
+    (slot param2 (default NA))
+)
+
         
 (defrule  beginagent1
     (declare (salience 11))
@@ -37,7 +48,7 @@
     (not (init-agent (done yes))) 
     (prior-cell (pos-r ?r) (pos-c ?c) (contains ?x)) 
 =>
-     (assert (K-cell (pos-r ?r) (pos-c ?c) (contains ?x)))      
+     (assert (K-cell (pos-r ?r) (pos-c ?c) (contains ?x) (initial yes))) ;K-Cell iniziali  
 )
             
 
@@ -75,8 +86,14 @@
     =>
         (retract ?bdis)
         (assert (BDistatus 1))
-        ;(focus UPDATE-BEL)
+        (assert (printGUI (time 0) (step 0) (source "AGENT") (verbosity 2) (text  "UPDATER-BEL Module invoked")))
+        (focus UPDATE-BEL)    
  )
+
+
+;### TODO: answer to new orders immediately and goto 0 !!!!
+
+
 
  (defrule ask_act
     ?f <-   (status (step ?i))
@@ -109,7 +126,8 @@
     =>
         (printout t crlf  "== AGENT ==" crlf) (printout t "Start the execution of the action: " ?oper)
         (assert (printGUI (time ?t) (step ?i) (source "AGENT") (verbosity 1) (text  "Start the execution of the action: %p1") (param1 ?oper)))      
-        (focus MAIN)
+        ;(pop-focus)
+        (pop-focus)
 )
 
 ;(defrule BDI_loop
@@ -149,7 +167,7 @@
 ;(defrule exec_act
 ;    (status (step ?i))
 ;    (exec (step ?i))
-; => (focus MAIN))
+; => (pop-focus))
 
 ; alcune azioni per testare il sistema
 ; (assert (exec (step 0) (action Forward)))
