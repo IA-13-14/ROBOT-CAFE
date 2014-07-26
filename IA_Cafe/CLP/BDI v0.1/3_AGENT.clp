@@ -4,9 +4,9 @@
 (defmodule AGENT (import MAIN ?ALL))
 
 ;#####  required for GUI #####
-(deftemplate init-agent (slot done (allowed-values yes no))) ; Ci dice se l'inizializzazione dell'agente Ã¨ conclusa
+(deftemplate init-agent (slot done (allowed-values yes no))) ; Ci dice se l'inizializzazione dell'agente è conclusa
 
-; Mantiene lo step in cui Ã¨ stata effettuata l'ultima percezione (onde evitare loop su una stessa percezione)
+; Mantiene lo step in cui è stata effettuata l'ultima percezione (onde evitare loop su una stessa percezione)
 (deftemplate last-perc (slot step))
 
 ;END -- #####  required for GUI #####
@@ -37,7 +37,7 @@
     (not (init-agent (done yes))) 
     (prior-cell (pos-r ?r) (pos-c ?c) (contains ?x)) 
 =>
-    ; (assert (K-cell (pos-r ?r) (pos-c ?c) (contains ?x)))      
+     (assert (K-cell (pos-r ?r) (pos-c ?c) (contains ?x)))      
 )
             
 
@@ -51,20 +51,20 @@
     (not (init-agent (done yes))) 
     (initial_agentposition (pos-r ?r) (pos-c ?c) (direction ?d))
 => 
-   ; (assert (K-agent (step 0) (time 0) (pos-r ?r) (pos-c ?c) (direction ?d)
+    (assert (K-agent (step 0) (time 0) (pos-r ?r) (pos-c ?c) (direction ?d)
                               (l-drink 0) (l-food 0) (l_d_waste no) (l_f_waste no)))
 
     ;#GUI#                          
-   ; (assert (last-perc (step -1)))
-   ; (assert (init-agent (done yes)))
+    (assert (last-perc (step -1)))
+    (assert (init-agent (done yes)))
 
-   ; (assert (printGUI (time 0) (step 0) (source "AGENT") (verbosity 2) (text  "AGENT INITIALIZED !")))
-   ; (assert (BDistatus 0))
+    (assert (printGUI (time 0) (step 0) (source "AGENT") (verbosity 2) (text  "AGENT INITIALIZED !")))
+    (assert (BDistatus 0))
 )
 
  ;### BDI Control Loop ###
 
- ;Initial step
+
  (defrule BDI_loop_0
     (declare (salience 100))
     (status (step ?s))
@@ -74,7 +74,7 @@
     ;(perc-vision (step ?s) (time ?t) (pos-r ?r) (pos-c ?c) (direction west)) ;o altre percezioni
     =>
         (retract ?bdis)
-       ; (assert (BDistatus 1))
+        (assert (BDistatus 1))
         ;(focus UPDATE-BEL)
  )
 
@@ -86,9 +86,10 @@
         (printout t crlf crlf)
         (modify ?f (result no))
         (retract ?bdis)
-       ; (assert (BDistatus 2))
+        (assert (BDistatus 2))
 )
 
+;IMPORTANT: Assert one action per step, actions for future steps will be executed without returning to the agent.
 (defrule BDI_loop_2
     (declare (salience 100))
     (status (step ?s))
@@ -97,18 +98,17 @@
     =>        
         (modify ?fs (step ?s))
         (retract ?bdis)
-       ; (assert  (BDistatus 0))
-        ;(assert (exec (step ?s) (action Wait)))
+        (assert  (BDistatus 0))
+        (assert (exec (step ?s) (action Wait)))
  )
 
-;IMPORTANT: Assert one action per step, actions for future steps will be executed without returning to the agent.
 (defrule exec_act    
     ;(declare (salience 2))
     (status (step ?i) (time ?t))
     (exec (step ?i) (action ?oper))    
     =>
         (printout t crlf  "== AGENT ==" crlf) (printout t "Start the execution of the action: " ?oper)
-       ; (assert (printGUI (time ?t) (step ?i) (source "AGENT") (verbosity 1) (text  "Start the execution of the action: %p1") (param1 ?oper)))      
+        (assert (printGUI (time ?t) (step ?i) (source "AGENT") (verbosity 1) (text  "Start the execution of the action: %p1") (param1 ?oper)))      
         (focus MAIN)
 )
 
