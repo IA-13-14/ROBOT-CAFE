@@ -132,16 +132,20 @@ public abstract class ClipsModel extends Observable implements Runnable {
                             /* Lo stato precedente viene inizalizzato al valore dello stato attuale
                                Fino a che lo stato precedente è uguale allo stato attuale, allora
                                proseguo (devo arrivare alla prossima percezione, facendo una run.
-                            */
-                            while(prec.equals(actual)) {
-                                run_feedback = core.runOne();
-                                current = core.findFact("AGENT", "last-perc", "TRUE", arrayPercept);
-                                if(current[0] == null) actual = -1;
-                                else actual = new Integer(current[0]);
-                            }
+                            */ run_feedback = core.run();
+                            //Stop solo dopo un halt di CLIPS
+                            executionMode=0;
+//                            while(prec.equals(actual)) {
+//                                run_feedback = core.runOnce();
+//                                //if(core.getClips())
+//                                	//System.out.println("HALTED");
+//                                current = core.findFact("AGENT", "last-perc", "TRUE", arrayPercept);
+//                                if(current[0] == null) actual = -1;
+//                                else actual = new Integer(current[0]);
+//                            }
                             // Per concludere faccio una runOne() e chiudo l'esecuzione.
-                            core.runOne();
-                            action();
+//                            core.runOne();
+                            //action();
                             this.setChanged();
                             this.notifyObservers("actionDone");
                         }

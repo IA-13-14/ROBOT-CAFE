@@ -2,6 +2,6 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
-	<classpathentry kind="lib" path="CLIPSJNI.jar"/>
+	<classpathentry kind="lib" path="CLIPSJNI.jar" sourcepath="E:/DATI/UTENTI/BLN-MAIN/Downloads/CLIPSJNI_0.3/java-src"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

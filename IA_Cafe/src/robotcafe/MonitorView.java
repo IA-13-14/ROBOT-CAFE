@@ -359,7 +359,7 @@ public class MonitorView extends ClipsView implements Observer {
     protected void updateOutput() {
         //########################### AGGIORNO LA FINESTRA DEI MESSAGGI DI OUTPUT ############################
         outputFrame.resetDocument(); //Svuotiamo la finestra per ripopolarla coi nuovi fatti
-        String [] slots= {"time", "step", "source", "verbosity", "text", "param1", "param2", "param3", "param4", "param5"};
+        String [] slots= {"time", "step", "source", "verbosity", "text", "param1", "param2", "param3", "param4", "param5","param6","param7","param8"};
         try {
             /**
              * Ogni fatto viene considerato nella forma:
@@ -377,7 +377,9 @@ public class MonitorView extends ClipsView implements Observer {
                     String source = removeFistAndLastChar(fatto[2]);
                     String line = fatto[1]+"\t"+source+"\t"+removeFistAndLastChar(fatto[4]); //prendiamo il testo così com'è
                     //E applichiamo le sostituzioni, appendendo il risultato alla finestra
-                    String parameters[] = {fatto[5], fatto[6], fatto[7], fatto[8], fatto[9]};
+                    String parameters[]=new String[fatto.length-5];
+                    for(int i=5,c=0;i<fatto.length;i++,c++)
+                    	parameters[c] = fatto[i];
                     outputFrame.write(mapParameters(line, parameters), source);
                 }
             }

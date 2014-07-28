@@ -1,6 +1,7 @@
 package xclipsjni;
 
 import CLIPSJNI.*;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -21,6 +22,10 @@ public class ClipsCore {
 	private Environment clips;
 	private RouterDialog router;
 
+	public Environment getClips() {
+		return clips;
+	}
+	
 	/**
          * Costruisce una nuova istanza di CLIPS, prelevando dalla cartella CPL/nome_strategia tutti i file .cpl oppure .txt.
          * Il nome_strategia è dato dalla variabile strategyFolder_name (che viene settata a seconda di quanto selezionato nella GUI).
@@ -42,10 +47,10 @@ public class ClipsCore {
             /* ------- Prima di tutto carichiamo i file CLP in CLIPS -------- */
             
             clips = new Environment();
-            
+
             File str_folder = new File("CLP"+ File.separator + strategyFolder_name); //Recupera la lista dei file nella cartella della strategia scelta
             File[] str_listOfFiles = str_folder.listFiles(); 
-          
+
             for (File clpFile : str_listOfFiles) {
                 try {
                     String fileName = clpFile.getName();
@@ -142,7 +147,7 @@ public class ClipsCore {
          * @return ritona 1 se ha successo 0 se fallisce
 	 */
 	public long runOne() {
-		return clips.run(1);
+		return clips.run(1);		
 	}
 
 	/**Equivalente alla funzione di Clips find-all-facts (vedere manuale per maggiori informazioni e sintassi delle conditions).

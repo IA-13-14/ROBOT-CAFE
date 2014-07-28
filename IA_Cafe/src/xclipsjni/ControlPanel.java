@@ -692,6 +692,14 @@ public class ControlPanel extends javax.swing.JFrame implements Observer {
                 this.runOneButton.setEnabled(false);
                 this.stepButton.setEnabled(false);
                 
+            } else  if (advice.equals("actionDone")) {
+            	 if (runButton.getText().equals("Stop")) {
+                     runButton.doClick();
+                 }
+//                this.runButton.setEnabled(false);
+//                this.runOneButton.setEnabled(false);
+//                this.stepButton.setEnabled(false);
+                
             }
                 
         } catch (Exception ex) {
