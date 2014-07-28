@@ -6,10 +6,28 @@
 (defmodule UPDATE-BEL (import MAIN ?ALL) (import AGENT ?ALL) (export ?ALL))
 
 ;### TODO: Mettere un flag di restart perchè altrimenti cancella subito le K-cell nuove !!!
+(defrule init-rule
+    (declare (salience 100))
+    (not (init))
+    (status (step ?s) (time ?t))    
+    =>
+        (assert (init)) 
+        (assert (runonce))
+        (assert (printGUI (time ?t) (step ?s) (source "AGENT::UPDATER-BEL") (verbosity 2) (text  "UPDATER-BEL Module invoked")))
+        (assert (K-agent (step ?s) (time ?t)))
+)
 
 ;Regola per rimuovere le vecchie percezioni, ormai obsolete
 (defrule clean-old-K-cell
+    (declare (salience 90))
+    (runonce)
     ?f <- (K-cell (initial no))
+    =>
+    (retract ?f)
+)
+
+(defrule stop-runonce
+    ?f <- (runonce)
     =>
     (retract ?f)
 )
@@ -17,7 +35,7 @@
 ; Regola per aggiornare il believe-state dell'ambiente (K-cell) in base alle percezioni dell'agente
 ; in questo caso se l'agente si muove verso WEST.
 (defrule  perc-west
-    
+    ?ka <- (K-agent (step ?s) (time ?t))
     (status (step ?s)) ;sono nello stato (clock) ?s
     ?p <- (perc-vision (step ?s) (time ?t) (pos-r ?r) (pos-c ?c) (direction west) ;c'è una percezione in questo stato (per direzione west)
             (perc1 ?x1) (perc2 ?x2) (perc3 ?x3)
@@ -45,10 +63,13 @@
     (assert (printGUI (time ?t) (step ?s) (source "AGENT::UPDATER-BEL") (verbosity 2) (text  "Perceived Watch position (%p1,%p2), direction (west)") (param1 ?r) (param2 ?c)))    
     
     (retract ?p) ; Elimina la percezione originale così da non ripetere l'aggiornamento (tanto ormai è diventata inutile !)
+
+    (modify ?ka (pos-r ?s) (pos-c ?t) (direction west)) ;update K-agent
 )
 
 ; Vedi precedente, caso EAST.
 (defrule perc-east
+    ?ka <- (K-agent (step ?s) (time ?t))
     (status (step ?s))
     ?p <- (perc-vision (step ?s) (time ?t) (pos-r ?r) (pos-c ?c) (direction east)
             (perc1 ?x9) (perc2 ?x8) (perc3 ?x7)
@@ -79,10 +100,13 @@
     (assert (printGUI (time ?t) (step ?s) (source "AGENT::UPDATER-BEL") (verbosity 2) (text  "Perceived Watch position (%p1,%p2), direction (east)") (param1 ?r) (param2 ?c)))    
     
     (retract ?p)
+
+    (modify ?ka (pos-r ?s) (pos-c ?t) (direction east)) ;update K-agent
 )
 
 ; Vedi precedente, caso NORTH.
 (defrule perc-north
+    ?ka <- (K-agent (step ?s) (time ?t))
     (status (step ?s))
     ?p <- (perc-vision (step ?s) (time ?t) (pos-r ?r) (pos-c ?c) (direction north)
       		(perc1 ?x7) (perc2 ?x4) (perc3 ?x1)
@@ -114,10 +138,13 @@
     (assert (printGUI (time ?t) (step ?s) (source "AGENT::UPDATER-BEL") (verbosity 2) (text  "Perceived Watch position (%p1,%p2), direction (north)") (param1 ?r) (param2 ?c)))    
     
     (retract ?p)
+
+    (modify ?ka (pos-r ?s) (pos-c ?t) (direction north)) ;update K-agent
 )
 
 ; Vedi precedente, caso SOUTH.
 (defrule perc-south
+    ?ka <- (K-agent (step ?s) (time ?t))
     (status (step ?s))
     ?p <- (perc-vision (step ?s) (time ?t) (pos-r ?r) (pos-c ?c) (direction south)
             (perc1 ?x3) (perc2 ?x6) (perc3 ?x9)
@@ -148,6 +175,8 @@
     (assert (printGUI (time ?t) (step ?s) (source "AGENT::UPDATER-BEL") (verbosity 2) (text  "Perceived Watch position (%p1,%p2), direction (south)") (param1 ?r) (param2 ?c)))    
     
     (retract ?p)
+
+    (modify ?ka (pos-r ?s) (pos-c ?t) (direction south)) ;update K-agent
 )
 
 
@@ -160,7 +189,8 @@
 ;    - PLANNING: Ordinazioni
 ;    - PLANNING: Movimenti
 
-(defrule perc-msg-to-agent-order         
+(defrule perc-msg-to-agent-order   
+    ;?ridc <- (req-id-counter ?rid)
     (status (step ?s))
     ?p <- (msg-to-agent
               (request-time ?t)
@@ -175,12 +205,16 @@
     (assert (dummy))
     (assert (printGUI (time ?t) (step ?s) (source "AGENT::UPDATER-BEL") (verbosity 2) (text  "Perceived Order on table (%p1), food (%p2), drink (%p3)") (param1 ?snd) (param2 ?food) (param3 ?drink)))
     ;do something
-    (assert (desire (step ?s) (time ?t) (table ?snd) (type order) (param1 ?food) (param2 ?drink)))
+    (assert (order (req-id ?t) (step ?s) (time ?t) (table ?snd) (food ?food) (drink ?drink)))
+    (assert (desire (step ?s) (time ?t) (table ?snd) (type order) (order ?t)))
+    (assert (answer-to-order (order ?t) (step ?s) (time ?t)))
+    ;(retract ?ridc)
+    ;(assert (req-id-counter (+ 1 ?rid)))
     
     (retract ?p)
 )
 
-(defrule perc-msg-to-agent-finish         
+(defrule perc-msg-to-agent-finish            
     (status (step ?s))
     ?p <- (msg-to-agent
               (request-time ?t)
@@ -251,3 +285,11 @@
 ;
 ;    (retract ?p)
 ;)
+
+(defrule dispose
+    (declare (salience -100))
+    ?f <- (init)
+    =>
+        (retract ?f)
+        (pop-focus)
+)

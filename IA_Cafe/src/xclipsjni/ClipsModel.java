@@ -68,6 +68,7 @@ public abstract class ClipsModel extends Observable implements Runnable {
                         else if (executionMode == 2) {
                             System.out.println("Clicked on RUN 1 BUTTON");
                             core.runOne();
+                            System.out.println("FOCUS:"+ core.getFocusStack());
                             action();
                             this.setChanged();
                             this.notifyObservers("actionDone");

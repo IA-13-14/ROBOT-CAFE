@@ -52,7 +52,7 @@ public class ClipsCore {
                     String extension = fileName.substring(fileName.lastIndexOf(".") + 1, fileName.length());
                     if(!clpFile.isHidden() && !clpFile.getName().startsWith(".") && (extension.equals("clp") || extension.equals("txt"))) {
                         System.out.println("Loading in CLIPS the file: CLP"+File.separator+strategyFolder_name+File.separator+fileName);
-                        clips.load("CLP"+File.separator+strategyFolder_name+File.separator+fileName); //carica ogni file
+                        clips.load("CLP"+File.separator+strategyFolder_name+File.separator+fileName); //carica ogni file                        
                     }
                 }catch (Exception e){
                     System.err.println("Error: " + e.getMessage());
@@ -280,6 +280,23 @@ public class ClipsCore {
 		evaluate(focus, eval);
 		router.stopRec();
 		return router.getStdout();
+	}
+	
+	/**Equivalente alla funzione facts di Clips.
+	 * Restituisce la lista dei facts del modulo corrente.
+	 *
+	 * @return una stringa che rappresenta i facts del modulo corrente
+	 * @throws ClipsException
+	 */
+	public String getFocusStack() throws ClipsException {
+		router.startRec();
+		PrimitiveValue fc = clips.eval("(get-focus-stack)");
+		return fc.toString();
+		/*String focus = fc.toString();
+		String eval = "(facts)";
+		evaluate(focus, eval);
+		router.stopRec();
+		return router.getStdout();*/
 	}
 
 	/**Equivalente alla funzione agenda di Clips.

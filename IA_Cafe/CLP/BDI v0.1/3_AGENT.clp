@@ -24,7 +24,7 @@
 	(slot direction) 
 	(slot l-drink)
         (slot l-food)
-        (slot l_d_waste)
+        (slot l_d_waste) ;COS'E' ?
         (slot l_f_waste)
 )
 
@@ -35,10 +35,25 @@
     (slot time)
     (slot table)
     (slot type (allowed-values order clean))
-    (slot param1 (default NA))
-    (slot param2 (default NA))
+    (slot order (default NA))
 )
 
+;### ANSWER-TO-ORDER Template ###
+(deftemplate answer-to-order
+    (slot step)
+    (slot time)
+    (slot order)
+)
+
+;### ANSWER-TO-ORDER Template ###
+(deftemplate order
+    (slot req-id)
+    (slot step)
+    (slot time)
+    (slot table)    
+    (slot food)
+    (slot drink)
+)
         
 (defrule  beginagent1
     (declare (salience 11))
@@ -48,7 +63,8 @@
     (not (init-agent (done yes))) 
     (prior-cell (pos-r ?r) (pos-c ?c) (contains ?x)) 
 =>
-     (assert (K-cell (pos-r ?r) (pos-c ?c) (contains ?x) (initial yes))) ;K-Cell iniziali  
+    (assert (K-cell (pos-r ?r) (pos-c ?c) (contains ?x) (initial yes))) ;K-Cell iniziali  
+    (assert (req-id-counter 0))
 )
             
 
@@ -86,13 +102,25 @@
     =>
         (retract ?bdis)
         (assert (BDistatus 1))
-        (assert (printGUI (time 0) (step 0) (source "AGENT") (verbosity 2) (text  "UPDATER-BEL Module invoked")))
         (focus UPDATE-BEL)    
  )
 
 
 ;### TODO: answer to new orders immediately and goto 0 !!!!
-
+(defrule BDI_check_answer-order
+    (declare (salience 100))
+    ?ansor <- (answer-to-order (step ?os) (time ?ot) (order ?req-id))
+    (order (step ?os) (time ?ot) (req-id ?req-id) (table ?otable) (food ?ofood) (drink ?odrink))
+    (status (step ?s))
+    ?bdis <- (BDistatus 1)
+    ;(perc-vision (step ?s) (time ?t) (pos-r ?r) (pos-c ?c) (direction west)) ;o altre percezioni
+    =>
+        (retract ?bdis)
+        (retract ?ansor)
+        (assert (BDistatus -1))
+        ;### TODO: Decidere se accettare o meno
+        (assert (exec (step ?s) (action Inform) (param1 ?otable) (param2 ?req-id) (param3 accepted)))  
+ )
 
 
  (defrule ask_act
@@ -107,7 +135,7 @@
 )
 
 ;IMPORTANT: Assert one action per step, actions for future steps will be executed without returning to the agent.
-(defrule BDI_loop_2
+(defrule BDI_loop_3
     (declare (salience 100))
     (status (step ?s))
     ?bdis <- (BDistatus 2)
@@ -121,12 +149,15 @@
 
 (defrule exec_act    
     ;(declare (salience 2))
+    ?bdis <- (BDistatus ?)
     (status (step ?i) (time ?t))
     (exec (step ?i) (action ?oper))    
     =>
         (printout t crlf  "== AGENT ==" crlf) (printout t "Start the execution of the action: " ?oper)
         (assert (printGUI (time ?t) (step ?i) (source "AGENT") (verbosity 1) (text  "Start the execution of the action: %p1") (param1 ?oper)))      
         ;(pop-focus)
+        (retract ?bdis)
+        (assert (BDistatus 0))
         (pop-focus)
 )
 
