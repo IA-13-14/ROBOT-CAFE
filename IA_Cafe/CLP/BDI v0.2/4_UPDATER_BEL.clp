@@ -5,7 +5,7 @@
 ;/-----------------------------------------------------------------------------------/
 (defmodule UPDATE-BEL (import MAIN ?ALL) (import AGENT ?ALL) (export ?ALL))
 
-;### TODO: Mettere un flag di restart perchè altrimenti cancella subito le K-cell nuove !!!
+; Initilization
 (defrule init-rule-new-step
     (declare (salience 100))
     (not (UPDATER-BEL__init))
@@ -75,7 +75,7 @@
     
     (retract ?p) ; Elimina la percezione originale così da non ripetere l'aggiornamento (tanto ormai è diventata inutile !)
 
-    (modify ?ka (pos-r ?s) (pos-c ?t) (direction west)) ;update K-agent
+    (modify ?ka (pos-r ?r) (pos-c ?c) (direction west)) ;update K-agent
 )
 
 ; Vedi precedente, caso EAST.
@@ -112,7 +112,7 @@
     
     (retract ?p)
 
-    (modify ?ka (pos-r ?s) (pos-c ?t) (direction east)) ;update K-agent
+    (modify ?ka (pos-r ?r) (pos-c ?c) (direction east)) ;update K-agent
 )
 
 ; Vedi precedente, caso NORTH.
@@ -150,7 +150,7 @@
     
     (retract ?p)
 
-    (modify ?ka (pos-r ?s) (pos-c ?t) (direction north)) ;update K-agent
+    (modify ?ka (pos-r ?r) (pos-c ?c) (direction north)) ;update K-agent
 )
 
 ; Vedi precedente, caso SOUTH.
@@ -187,7 +187,7 @@
     
     (retract ?p)
 
-    (modify ?ka (pos-r ?s) (pos-c ?t) (direction south)) ;update K-agent
+    (modify ?ka (pos-r ?r) (pos-c ?c) (direction south)) ;update K-agent
 )
 
 

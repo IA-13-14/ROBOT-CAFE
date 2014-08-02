@@ -61,8 +61,8 @@
     =>
     (retract ?f1)  
     (assert (path-planning-result (success no)))
-    (pop-focus)
     (assert (printGUI (time ?t) (step ?s) (source "AGENT::PATH-PLANNER") (verbosity 2) (text  "Searching path from (%p1,%p2-%p3) to (%p4,%p5-%p6) - UNREACHEABLE DESTINATION !") (param1 ?s-r) (param2 ?s-c) (param3 ?s-dir) (param4 ?d-r) (param5 ?d-c) (param6 ?d-dir)))
+    (pop-focus)
 )
 
 ;Regola per iniziare la ricerca
