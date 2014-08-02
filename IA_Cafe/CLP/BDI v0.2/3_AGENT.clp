@@ -146,6 +146,7 @@
 
 
 (defrule test-path-planner
+    (declare (salience 50))
     ?f <- (AGENT__runonce)
     (status (step ?s))
     (K-agent (step ?s) (time ?t) (pos-r ?r) (pos-c ?c) (direction ?dir)) ;prova PATH_PLANNER
@@ -161,6 +162,7 @@
 )
 
 (defrule path-planner-result
+    (declare (salience 49))
     (path-planning-result (success yes))
     (path-planning-action (sequence ?seq) (operator ?oper))
     =>
@@ -180,6 +182,7 @@
 )
 
 (defrule path-planner-result-exec-step
+    (declare (salience 48))
     (status (step ?s) (time ?t))
     (not (exec (step ?s)))
     (path-planning-result (success yes))
@@ -193,8 +196,8 @@
 )   
 
 ;IMPORTANT: Assert one action per step, actions for future steps will be executed without returning to the agent.
-(defrule BDI_loop_3
-    (declare (salience 100))
+(defrule BDI_loop_3_default
+    ;(declare (salience 100))
     (status (step ?s))
     ?bdis <- (BDistatus 2)
     ?fs <- (last-perc (step ?old-s))
@@ -207,7 +210,7 @@
  )   
 
 (defrule BDI_loop_3
-    (declare (salience 100))
+    ;(declare (salience 100))
     (status (step ?s))
     ?bdis <- (BDistatus 2)
     ?fs <- (last-perc (step ?old-s))
