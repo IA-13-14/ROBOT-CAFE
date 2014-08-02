@@ -48,7 +48,7 @@
 (deftemplate newnode (slot ident) (slot gcost) (slot fcost) (slot father) (slot direction (allowed-values north south east west))
                   (slot pos-r) (slot pos-c))
 
-(deftemplate goal (slot direction (allowed-values north south east west)) (slot pos-r) (slot pos-c))
+(deftemplate goal (slot direction (allowed-values north south east west any)) (slot pos-r) (slot pos-c))
 
 
 
@@ -84,6 +84,20 @@
     (assert (goal (direction ?d-dir) (pos-r ?d-r) (pos-c ?d-c)))
 
     (assert (printGUI (time ?t) (step ?s) (source "AGENT::PATH-PLANNER") (verbosity 2) (text  "Searching path from (%p1,%p2-%p3) to (%p4,%p5-%p6)") (param1 ?s-r) (param2 ?s-c) (param3 ?s-dir) (param4 ?d-r) (param5 ?d-c) (param6 ?d-dir)))
+)
+
+;Controllo arrivato al goal
+(defrule achieved-goal-any-dir
+    (declare (salience 100))
+    (current ?id)
+    (goal (direction any) (pos-r ?r) (pos-c ?c))
+    (node (ident ?id) (pos-r ?r) (pos-c ?c) (gcost ?g))  
+    
+    =>
+    (halt); for debug purpose
+    (printout t "(HALTED FOR DEBUG) Esiste soluzione per goal (" ?r "," ?c ") con costo "  ?g crlf)
+    (assert (stampa ?id 1))
+    (assert (path-planning-result (success yes)))
 )
 
 ;Controllo arrivato al goal

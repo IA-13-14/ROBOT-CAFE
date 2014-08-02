@@ -280,22 +280,22 @@
     (retract ?p)
 ) 
 
-;(defrule percp-finish
-;    (status (step ?s))
-;    ?p <- (perc-load
-;            (step ?s)
-;            (time ?t)		
-;	        (finish ?finish)
-;          )		
-;
-;    =>
-;
-;    (assert (dummy))
-;    (assert (printGUI (time ?t) (step ?s) (source "AGENT::UPDATER-BEL") (verbosity 2) (text  "Perceived Finish on table (%p1)") (param1 ?oper)))
-;    ;do something
-;
-;    (retract ?p)
-;)
+;Percezione tavolo da pulire (dopo CheckFinish)
+(defrule percp-finish
+    (status (step ?s))
+    ?p <- (perc-finish
+            (step ?s)
+            (time ?t)		
+	        (finish ?finish)
+          )		
+    ?ka <- (K-agent (step ?s) (time ?t) (pos-r ?r) (pos-c ?c))
+    =>
+
+    (assert (printGUI (time ?t) (step ?s) (source "AGENT::UPDATER-BEL") (verbosity 2) (text  "Perceived table next to (%p1,%p2), dirty (%p3)") (param1 ?r) (param2 ?c) (param3 ?finish)))
+    ;do something
+
+    (retract ?p)
+)
 
 (defrule dispose
     (declare (salience -100))

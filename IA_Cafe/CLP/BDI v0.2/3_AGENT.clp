@@ -55,9 +55,59 @@
     (slot drink)
 )
 
+;#### INTENTIONS Template ####
+(deftemplate intention
+    (slot step)
+    (slot time)
+    (slot accepted-time)
+    (slot accepted-step)
+    (slot table)
+    (slot type (allowed-values order clean))
+    (slot order (default NA))
+    (slot desire) ;Desire indexed with time
+)
+
+;#### PLAN-ACTIONS Template ####
+; Azioni complesse prodotte dalla pianificazione (es Goto e Load/Delivery parametriche)
+(deftemplate plan-action
+    (slot seq)
+    (slot action  (allowed-values Goto Wait LoadDrink LoadFood DeliveryFood DeliveryDrink 
+                                      CleanTable EmptyFood EmptyDrink CheckFinish Inform))
+        (slot param1)
+        (slot param2)
+        (slot param3)
+)
+;Goto (x,y)
+;LoadDrink, LoadFood (dispenser x, y, qty [1,4])
+;DeliveryDrink, DeliveryFood (table x, y, qty [1,4])
+;CleanTable (table x, y)
+;EmptyFood (trashbin x, y)
+;EmptyDrink (reciclebin x, y)
+;CheckFinish (table x, y)
+
+;#### BASIC-ACTIONS Template ####
+; Azioni elementari direttamente eseguibili dall'agente
+(deftemplate basic-action
+    (slot seq)
+	(slot action  (allowed-values Forward Turnright Turnleft Wait 
+                                      LoadDrink LoadFood DeliveryFood DeliveryDrink 
+                                      CleanTable EmptyFood Release CheckFinish Inform))
+        (slot param1)
+        (slot param2)
+        (slot param3)
+)
+;#### MODULE ACTIONS_PLANNER Templates ####
+(deftemplate ACTIONS-PLANNER-decode-action   
+        (slot action  (allowed-values Goto Wait LoadDrink LoadFood DeliveryFood DeliveryDrink 
+                                      CleanTable EmptyFood EmptyDrink CheckFinish Inform))
+        (slot param1)
+        (slot param2)
+        (slot param3)
+)
+
 ;#### MODULE PATH_PLANNER Templates ####
 (deftemplate start-path-planning (slot source-direction (allowed-values north south east west)) (slot source-r) (slot source-c)
-                                 (slot dest-direction (allowed-values north south east west)) (slot dest-r) (slot dest-c))
+                                 (slot dest-direction (allowed-values north south east west any)) (slot dest-r) (slot dest-c))
 
 (deftemplate path-planning-action (slot sequence) (slot operator))
 (deftemplate path-planning-result (slot success (allowed-values yes no)))
@@ -94,143 +144,232 @@
     (assert (last-perc (step -1)))
     (assert (init-agent (done yes)))
 
-    (assert (printGUI (time 0) (step 0) (source "AGENT") (verbosity 2) (text  "AGENT INITIALIZED !")))
-    (assert (BDistatus 0))
+    (assert (printGUI (time 0) (step 0) (source "AGENT") (verbosity 2) (text  "AGENT INITIALIZED !")))    
     (assert (AGENT__runonce))
+    (assert (forward_action_retry_counter 0))
+    (assert (plan-actions-seq 0))
+    (assert (basic-actions-seq 0))
 )
 
  ;### BDI Control Loop ###
 
-
- (defrule BDI_loop_0
+; Initilization
+(defrule BDI_loop_0
     (declare (salience 100))
+    (not (init))
+    (status (step ?s) (time ?t))    
+    =>
+        (assert (init))
+        (assert (printGUI (time ?t) (step ?s) (source "AGENT") (verbosity 2) (text  "BDI Loop started !")))
+        (assert (actions_retry_counter 0))
+        (assert (BDistatus BDI-1))
+)
+
+;Update Belief
+(defrule BDI_loop_1
+    (declare (salience 95))
+    ?bdis <- (BDistatus BDI-1)
     (status (step ?s))
-    ?fs <- (last-perc (step ?old-s))
-    ?bdis <- (BDistatus 0)
+    ?fs <- (last-perc (step ?old-s))    
     (test (> ?s ?old-s))
-    ;(perc-vision (step ?s) (time ?t) (pos-r ?r) (pos-c ?c) (direction west)) ;o altre percezioni
     =>
         (retract ?bdis)
-        (assert (BDistatus 1))
-        (focus UPDATE-BEL)    
- )
+        (assert (BDistatus BDI-2))
+        (focus UPDATE-BEL)    ;Update Belief Module Invoked
+)
 
 
 ;### TODO: answer to new orders immediately and goto 0 !!!!
-(defrule BDI_check_answer-order
-    (declare (salience 100))
+(defrule BDI_loop_2_check_answer_order
+    (declare (salience 90))
+    ?bdis <- (BDistatus BDI-2)
     ?ansor <- (answer-to-order (step ?os) (time ?ot) (order ?req-id))
     (order (step ?os) (time ?ot) (req-id ?req-id) (table ?otable) (food ?ofood) (drink ?odrink))
-    (status (step ?s))
-    ?bdis <- (BDistatus 1)
-    ;(perc-vision (step ?s) (time ?t) (pos-r ?r) (pos-c ?c) (direction west)) ;o altre percezioni
+    (status (step ?s))        
     =>
         (retract ?bdis)
         (retract ?ansor)
-        (assert (BDistatus -1))
         ;### TODO: Decidere se accettare o meno
         (assert (exec (step ?s) (action Inform) (param1 ?otable) (param2 ?req-id) (param3 accepted)))  
- )
+        (assert (BDistatus BDI-EXEC-ACTION)) ;Execute action and reset
+)
 
-
- (defrule ask_act
-    ?f <-   (status (step ?i))
-    ?bdis <- (BDistatus 1)
-    =>  (printout t crlf crlf)
-        (printout t "action to be executed at step:" ?i)
-        (printout t crlf crlf)
-        (modify ?f (result no))
+(defrule BDI_loop_2_no_answer_order
+    (declare (salience 90))
+    ?bdis <- (BDistatus BDI-2)          
+    =>
         (retract ?bdis)
-        (assert (BDistatus 2))
+        (assert (BDistatus BDI-3))
 )
 
+; (defrule ask_act
+;    ?f <-   (status (step ?i))
+;    ?bdis <- (BDistatus 1)
+;    =>  (printout t crlf crlf)
+;        (printout t "action to be executed at step:" ?i)
+;        (printout t crlf crlf)
+;        (modify ?f (result no))
+;        (retract ?bdis)
+;        (assert (BDistatus 2))
+;)
 
-(defrule test-path-planner
+;Deliberation
+(defrule BDI_loop_3
+    (declare (salience 85))
+    ?bdis <- (BDistatus BDI-3)    
+    (status (step ?s))        
+    =>
+        (retract ?bdis)
+        ;### TODO: Deliberate 
+        (assert (BDistatus BDI-4))
+)
+
+;Planning
+(defrule BDI_loop_4
+    (declare (salience 80))
+    ?bdis <- (BDistatus BDI-4)    
+    (status (step ?s))        
+    =>
+        (retract ?bdis)
+        ;### TODO: Plan if needed 
+        (assert (BDistatus BDI-5))
+)
+
+;Actions-Planning
+(defrule BDI_loop_5
+    (declare (salience 75))
+    ;### TODO: Check if needed to replan
+    ?bdis <- (BDistatus BDI-5)
+    (not (basic-actions));### TODO: Add or condition (actions_retry_counter ?art&:(> ?art 0)))    
+    (plan-actions-seq ?seq)
+    ?baseq-f <- (basic-actions-seq ?ba-seq)
+    (plan-action (seq ?seq)
+            (action ?plan-action)
+            (param1 ?p1)
+            (param2 ?p2)
+            (param3 ?p3))
+    (status (step ?s))        
+    =>
+        (retract ?bdis)
+        (assert (ACTIONS-PLANNER-decode-action (action ?plan-action) (param1 ?p1) (param2 ?p2) (param3 ?p3)))
+        (focus ACTIONS-PLANNER) ;Decode planning actions to basic actions
+        (assert (BDistatus BDI-6))
+        (retract ?baseq-f) ;Reset Basic Action Sequence Counter
+        (assert (basic-actions-seq 0))
+)
+
+;Exec head basic action if possible
+(defrule BDI_loop_6_possible_A_head
+    (declare (salience 70))
+    ?bdis <- (BDistatus BDI-6)
+    ?baseq-f <- (basic-actions-seq ?baseq)
+    ?ba-f <- (basic-action
+                (seq ?baseq)
+                (action ?action)
+                (param1 ?p1)
+                (param2 ?p2)
+                (param3 ?p3))
+    (status (step ?s)) 
+    ;### TODO: Check if action is possible
+    =>
+        (retract ?bdis)
+        (retract ?ba-f)
+        (assert (exec (step ?s) (action ?action)))
+        (retract ?baseq-f) ;Advance Basic Action Sequence Counter
+        (assert (basic-actions-seq (+ 1 ?baseq)))
+        (assert (BDistatus BDI-EXEC-check-plan))
+)
+
+;Check Empty basic actions -> Remove plan -> next rule
+(defrule BDI-EXEC-check-plan  
     (declare (salience 50))
-    ?f <- (AGENT__runonce)
-    (status (step ?s))
-    (K-agent (step ?s) (time ?t) (pos-r ?r) (pos-c ?c) (direction ?dir)) ;prova PATH_PLANNER
-    (Table (table-id T4) (pos-r ?dr) (pos-c ?dc)) ;prova PATH_PLANNER
+    ?bdis <- (BDistatus BDI-EXEC-check-plan)
+    (status (step ?i) (time ?t))
+    (not (basic-action))
+    ?pa <- (plan-action (seq ?seq) (action ?action))
     =>
-        (retract ?f)
-
-        ;prova PATH_PLANNER
-        (assert (start-path-planning (source-direction ?dir) (source-r ?r) (source-c ?c)
-                                 (dest-direction ?dir) (dest-r (+ 1 ?dr)) (dest-c ?dc)))
-        (focus PATH-PLANNER)
-        (assert (path-planner-seq 1))
+        (assert (printGUI (time ?t) (step ?i) (source "AGENT") (verbosity 1) (text  "No more basic actions for plan action (%p1-%p2), removing plan action.") (param1 ?seq) (param2 ?action)))      
+        (retract ?pa)
+        (retract ?bdis)
+        (assert (BDistatus BDI-EXEC-check-intention))              
 )
 
-(defrule path-planner-result
-    (declare (salience 49))
-    (path-planning-result (success yes))
-    (path-planning-action (sequence ?seq) (operator ?oper))
+;Check Empty plan -> Remove intention and related desire -> execute action next rule
+(defrule BDI-EXEC-check-intention  
+    (declare (salience 45))
+    ?bdis <- (BDistatus BDI-EXEC-check-intention)
+    (status (step ?i) (time ?t))
+    (not (plan-action))
+    ?intention <- (intention (desire ?des-t))
+    ?desire <- (desire (time ?des-t))
     =>
-        (printout t " " ?seq ") PP azione " ?oper )
-        ;(retract ?f)
+        (assert (printGUI (time ?t) (step ?i) (source "AGENT") (verbosity 1) (text  "No more plan actions for intention (%p1), removing intention and desire.") (param1 ?des-t)))      
+        (retract ?intention)
+        (retract ?desire)            
 )
 
-(deffunction pp-oper-decode (?oper)
-    (switch ?oper
-      (case fwd-up then Forward)
-      (case fwd-down then Forward)
-      (case fwd-left then Forward)
-      (case fwd-right then Forward)
-      (case turn-left then Turnleft)
-      (case turn-right then Turnright)
-    )
+(defrule BDI-EXEC-check-intention-end
+    (declare (salience 40))
+    ?bdis <- (BDistatus BDI-EXEC-check-intention)
+    =>        
+        (retract ?bdis)
+        (assert (BDistatus BDI-EXEC-ACTION))              
 )
 
-(defrule path-planner-result-exec-step
-    (declare (salience 48))
-    (status (step ?s) (time ?t))
-    (not (exec (step ?s)))
-    (path-planning-result (success yes))
-    ?f <- (path-planner-seq ?seq)
-    (path-planning-action (sequence ?seq) (operator ?oper))
-    =>
-        (printout t " " ?seq ") Eseguo azione " ?oper " da stato " crlf)
-        (retract ?f)
-        (assert (path-planner-seq (+ 1 ?seq)))
-        (assert (exec (step ?s) (action (pp-oper-decode ?oper))))
-)   
+;(defrule path-planner-result-exec-step
+;    (declare (salience 48))
+;    (status (step ?s) (time ?t))
+;    (not (exec (step ?s)))
+;    (path-planning-result (success yes))
+;    ?f <- (path-planner-seq ?seq)
+;    (path-planning-action (sequence ?seq) (operator ?oper))
+;    =>
+;        (printout t " " ?seq ") Eseguo azione " ?oper " da stato " crlf)
+;        (retract ?f)
+;        (assert (path-planner-seq (+ 1 ?seq)))
+;        (assert (exec (step ?s) (action (pp-oper-decode ?oper))))
+;)   
 
 ;IMPORTANT: Assert one action per step, actions for future steps will be executed without returning to the agent.
-(defrule BDI_loop_3_default
-    ;(declare (salience 100))
-    (status (step ?s))
-    ?bdis <- (BDistatus 2)
-    ?fs <- (last-perc (step ?old-s))
-    (not (exec (step ?s)))
-    =>        
-        (modify ?fs (step ?s))
-        (retract ?bdis)
-        (assert  (BDistatus 0))
-        (assert (exec (step ?s) (action Wait)))    
- )   
+;(defrule BDI_loop_3_default
+;    ;(declare (salience 100))
+;    (status (step ?s))
+;    ?bdis <- (BDistatus 2)
+;    ?fs <- (last-perc (step ?old-s))
+;    (not (exec (step ?s)))
+;    =>        
+;        (modify ?fs (step ?s))
+;        (retract ?bdis)
+;        (assert  (BDistatus 0))
+;        (assert (exec (step ?s) (action Wait)))    
+; )   
 
-(defrule BDI_loop_3
-    ;(declare (salience 100))
-    (status (step ?s))
-    ?bdis <- (BDistatus 2)
-    ?fs <- (last-perc (step ?old-s))
-    =>        
-        (modify ?fs (step ?s))
-        (retract ?bdis)
-        (assert  (BDistatus 0))        
- )   
+;(defrule BDI_loop_3
+;    ;(declare (salience 100))
+;    (status (step ?s))
+;    ?bdis <- (BDistatus 2)
+;    ?fs <- (last-perc (step ?old-s))
+;    =>        
+;        (modify ?fs (step ?s))
+;        (retract ?bdis)
+;        (assert  (BDistatus 0))        
+; )   
 
-(defrule exec_act    
-    ;(declare (salience 2))
-    ?bdis <- (BDistatus ?)
+
+
+;Executes Action and reset module initialization
+(defrule BDI-EXEC-ACTION    
+    (declare (salience 20))
+    ?bdis <- (BDistatus BDI-EXEC-ACTION)
     (status (step ?i) (time ?t))
-    (exec (step ?i) (action ?oper))    
+    (exec (step ?i) (action ?oper))   
+    ?f <- (init) 
     =>
         (printout t crlf  "== AGENT ==" crlf) (printout t "Start the execution of the action: " ?oper)
         (assert (printGUI (time ?t) (step ?i) (source "AGENT") (verbosity 1) (text  "Start the execution of the action: %p1") (param1 ?oper)))      
-        ;(pop-focus)
         (retract ?bdis)
-        (assert (BDistatus 0))
+        (assert (BDistatus BDI-0))      
+        (retract ?f)
         (pop-focus)
 )
 
