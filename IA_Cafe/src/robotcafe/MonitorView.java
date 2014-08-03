@@ -263,13 +263,15 @@ public class MonitorView extends ClipsView implements Observer {
                 if (mapString[i][j].length() >= 6 && mapString[i][j].substring(0, 6).equals("agent_")) {
                     direction = model.getDirection();
                     // ...nel, caso prosegue dal 6° carattere in poi.
-                    background = ImageIO.read(new File("img" + File.separator + map_img.get(mapString[i][j].substring(6, mapString[i][j].length()))));
+                    String agent_description[]=mapString[i][j].split("_");
+                    background = ImageIO.read(new File("img" + File.separator + map_img.get(agent_description[1])));
                     robot = ImageIO.read(new File("img" + File.separator + map_img.get("agent_" + direction)));
 
                     icon = overlapImages(robot, background);    
                     
                     //Imposta il tooltip
-                    map[i][j].setToolTipText("Agent (" + (i + 1) + ", " + (j + 1) + ")");
+                    map[i][j].setToolTipText(null);
+                    map[i][j].setToolTipText("Agent (" + (i + 1) + ", " + (j + 1) + ")"+"(F:"+agent_description[2]+",D:"+agent_description[3]+",WF:"+agent_description[4]+",WD:"+agent_description[5]+")");
                
                 // ##### SE PERSONA #####
                 } else if(mapString[i][j].length() >= 7 && mapString[i][j].substring(0, 7).equals("person_")) {

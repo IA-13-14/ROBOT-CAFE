@@ -125,7 +125,7 @@ public class MonitorModel extends ClipsModel {
             
             //Nel modello abbiamo la stringa agent_background, la cosa verrà interpretata nella View (updateMap())
             String background = map[r - 1][c - 1];
-            map[r - 1][c - 1] = "agent_" + background;
+            map[r - 1][c - 1] = "agent_" + background+"_"+l_food+"_"+l_drink+"_"+l_f_waste+"_"+l_d_waste;
         }
         DebugFrame.appendText("[SYSTEM] Aggiornato lo stato dell'agente.");
         
