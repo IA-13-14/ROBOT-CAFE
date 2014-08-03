@@ -1,24 +1,20 @@
 package xclipsjni;
 
 import java.awt.Dimension;
-import java.awt.Toolkit;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
-import java.io.IOException;
 import java.util.Observable;
 import java.util.Observer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.swing.AbstractAction;
-import javax.swing.Action;
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
@@ -49,8 +45,14 @@ public class ControlPanel extends javax.swing.JFrame implements Observer {
     public ControlPanel(ClipsModel model) {
         initComponents();
         this.model = model;
-        Dimension screenDim = Toolkit.getDefaultToolkit().getScreenSize();
-        Dimension propertyMonitorDim = new Dimension(624, 325);
+        //Dimension screenDim = Toolkit.getDefaultToolkit().getScreenSize();
+        GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+    	int width = gd.getDisplayMode().getWidth();
+    	int height = gd.getDisplayMode().getHeight();
+    	Dimension screenDim=new Dimension(width,height);
+        
+        Dimension propertyMonitorDim = new Dimension(width/4, 325);
+        
 
         agendaMonitor = new PropertyMonitor("Agenda");
         agendaMonitor.setSize(propertyMonitorDim);          
@@ -517,7 +519,15 @@ public class ControlPanel extends javax.swing.JFrame implements Observer {
 
     private void runButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_runButtonActionPerformed
         // Il tasto può essere Run oppure Stop (a seconda di cosa era attivo)
-        if (runButton.getText().equals("Run")) {
+    	if (runButton.getText().equals("Stop")) {
+    		 model.setMode("STOP");
+             model.resume();
+             runButton.setText("Run");
+             stepButton.setEnabled(true);
+             runOneButton.setEnabled(true);
+             resetButton.setEnabled(true);
+    	}
+    	else if (runButton.getText().equals("Run")) {
             model.setMode("RUN");
             model.resume();
             runButton.setText("Stop");

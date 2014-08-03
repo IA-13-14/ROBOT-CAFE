@@ -177,7 +177,10 @@ public abstract class ClipsModel extends Observable implements Runnable {
      * STEP per eseguire una exec alla volta.
      */
     public synchronized void setMode(String mode) {
-            if (mode.equals("START")) {
+	    	 if (mode.equals("STOP")) {
+	    		 this.executionMode = 0;
+	    	 }    	     
+	    	 if (mode.equals("START")) {
                     this.executionMode = 1;
             }
             if (mode.equals("RUNONE")) {

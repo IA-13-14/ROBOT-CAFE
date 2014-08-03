@@ -4,6 +4,8 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
 import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
@@ -14,12 +16,14 @@ import java.util.Map;
 import java.util.Observer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+
 import xclipsjni.ClipsView;
 import xclipsjni.ControlPanel;
 
@@ -152,9 +156,14 @@ public class MonitorView extends ClipsView implements Observer {
      *
      */
     private void initializeInterface() {
+    	
+    	GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+    	int width = gd.getDisplayMode().getWidth();
+    	int height = gd.getDisplayMode().getHeight();
+    	
         view = new JFrame();
         view.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        view.setSize(new Dimension(689, 160));
+        view.setSize(new Dimension(width/3, 160));
         view.setResizable(true);
         view.setTitle("Waiter-Bot");
         view.setLayout(new BorderLayout());
@@ -163,8 +172,10 @@ public class MonitorView extends ClipsView implements Observer {
         view.add(cp_JPanel, BorderLayout.NORTH);        
         
         outputFrame = new PrintOutWindow(this);
-        outputFrame.setLocation(view.getX()+view.getWidth()+10, view.getY());
+        outputFrame.setSize(width/4,500);
+        outputFrame.setLocation(width-2*outputFrame.getWidth(), view.getY());
         outputFrame.setVisible(true);
+        
         
         //comando inserito in questa posizione per settare il focus iniziale sulla finestra principale e non su quella di output
         view.setVisible(true);
@@ -288,7 +299,8 @@ public class MonitorView extends ClipsView implements Observer {
                     icon = new ImageIcon(path_image);
 
                     //Imposta il tooltip
-                    map[i][j].setToolTipText("Table "+table_info[2]+" "+"("+ (i+1) +", "+ (j+1) +")");
+                    map[i][j].setToolTipText(null);
+                    map[i][j].setToolTipText("Table "+table_info[2]+" "+"("+ (i+1) +", "+ (j+1) +") - F:"+table_info[3]+", D:"+table_info[4]);
 
                 // ##### ALTRIMENTI ####
                 // Era una cella che non aveva bisogno di sovrapposizioni e non è una persona
@@ -331,10 +343,10 @@ public class MonitorView extends ClipsView implements Observer {
         return new ImageIcon(combined); 
     }
     
-    @SuppressWarnings("ResultOfObjectAllocationIgnored")
-    public static void main(String[] args) {
-        new MonitorView();
-    }
+//    @SuppressWarnings("ResultOfObjectAllocationIgnored")
+//    public static void main(String[] args) {
+//        new MonitorView();
+//    }
 
     /*
     Metodo chiamato per resettare l'interfaccia grafica.

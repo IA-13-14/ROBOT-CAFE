@@ -161,7 +161,7 @@ public class MonitorModel extends ClipsModel {
         
                 
         // ######################## FATTO tablestatus ##########################
-        String[] tableStatus = {"step", "table-id", "clean"};
+        String[] tableStatus = {"step", "table-id", "clean","l-food","l-drink"};
         String[][] tables = core.findAllFacts("ENV", "tablestatus", "TRUE", tableStatus);
         if(tables != null) {
             //Per ogni tavolo
@@ -169,6 +169,8 @@ public class MonitorModel extends ClipsModel {
                 if (table[0] != null) { //bisogna fare qualcosa solo se non è pulito
                     String table_status = table[2];
                     String table_id = table[1];
+                    String table_food = table[3];
+                    String table_drink = table[4];
 
                     if(table_status.equals("yes")) table_status = "clean";
                     else table_status = "dirty";
@@ -181,7 +183,7 @@ public class MonitorModel extends ClipsModel {
                     int table_r = new Integer(that_table[1]);
                     int table_c = new Integer(that_table[2]);
 
-                    map[table_r - 1][table_c - 1] = "Table"+"_"+table_status+"_"+table_id;
+                    map[table_r - 1][table_c - 1] = "Table"+"_"+table_status+"_"+table_id+"_"+table_food+"_"+table_drink;
 
                     DebugFrame.appendText("[ENV] Table-id: "+table_id +" at position ("+table_r+","+table_c+") is "+table_status);
                 }
