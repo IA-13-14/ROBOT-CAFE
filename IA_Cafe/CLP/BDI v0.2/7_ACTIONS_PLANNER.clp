@@ -120,6 +120,22 @@
 )
 ;### DECODE Action LoadDrink-LoadFood-DeliveryDrink-DeliveryFood ###
 
+(deffunction EmptyDrink-oper-decode (?oper)
+    (switch ?oper
+      (case EmptyDrink then Release)
+      (case EmptyFood then EmptyFood)
+      (case CleanTable then CleanTable)      
+    )
+)
+
+;Decode CleanTable
+(defrule decode-CleanTable-EmptyFood-EmptyDrink
+    ?f <- (ACTIONS-PLANNER-decode-action (action ?action&CleanTable|EmptyFood|EmptyDrink) (param1 ?r) (param2 ?c) (param3 ?qty))
+    =>
+        (assert (basic-action (seq 0) (action (EmptyDrink-oper-decode ?action)) (param1 ?r) (param2 ?c)))
+        (retract ?f)
+)
+
 ;Clean up
 (defrule clean
     (declare (salience -90))

@@ -28,6 +28,16 @@
         (slot l_f_waste)
 )
 
+;### Action Execution History Template ###
+(deftemplate exec-history 
+	(slot step) 	
+	(slot action  (allowed-values Forward Turnright Turnleft Wait 
+                                      LoadDrink LoadFood DeliveryFood DeliveryDrink 
+                                      CleanTable EmptyFood Release CheckFinish Inform))
+    (slot param1)
+    (slot param2)
+    (slot param3)
+)
 
 ;#### DESIRES Template ####
 (deftemplate desire
@@ -164,6 +174,11 @@
         (assert (plan-action (seq 4) (action DeliveryFood) (param1 5) (param2 6) (param3 1)))
         (assert (plan-action (seq 5) (action DeliveryDrink) (param1 5) (param2 6) (param3 1)))
         (assert (plan-action (seq 6) (action Goto) (param1 7) (param2 6)))
+        (assert (plan-action (seq 7) (action Goto) (param1 6) (param2 6)))
+        (assert (plan-action (seq 8) (action CleanTable) (param1 5) (param2 6)))
+        (assert (plan-action (seq 9) (action Goto) (param1 8) (param2 6)))
+        (assert (plan-action (seq 10) (action EmptyFood) (param1 8) (param2 5)))
+        (assert (plan-action (seq 11) (action EmptyDrink) (param1 8) (param2 7)))        
 )
 
 ;### BDI Control Loop ###
@@ -428,14 +443,23 @@
     (exec (step ?i) (action ?oper) (param1 ?p1) (param2 ?p2) (param3 ?p3))   
     ?f <- (AGENT__init) 
     =>
+        (assert (exec-history (step ?i) (action ?oper) (param1 ?p1) (param2 ?p2) (param3 ?p3)))   
         (printout t crlf  "== AGENT ==" crlf) (printout t "Start the execution of the action: " ?oper)
         (assert (printGUI (time ?t) (step ?i) (source "AGENT") (verbosity 1) (text  "Start the execution of the action: %p1 (%p2,%p3,%p4)") (param1 ?oper) (param2 ?p1) (param3 ?p2) (param4 ?p3)))      
         (retract ?bdis)
         (assert (BDistatus BDI-0))      
         (retract ?f)
-        (pop-focus)
+        (pop-focus)   
 )
-;### TODO: Update belief upon action execution (robot loaded, table status, etc)
+
+;### FATTO: Update belief upon action execution (robot loaded, table status, etc)
+; Esempio:    Per le azioni di carico/scarico si può verificare il successo al giro successivo con la
+;             percezione load. E' necessario tenere traccia dell'azione eseguita nell'istante precedente.
+;             Non serve a molto perchè non funziona per cleantable e per scarico rifiuti.
+;             Tuttavia, si può usare questo sistema per implementare il risultato della CheckFinish, che però
+;             per ora non si ritiene utile usare.
+
+
 
 ;(defrule BDI_loop
 ;    (status (step ?s))

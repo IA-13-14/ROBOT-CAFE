@@ -10,12 +10,32 @@
     (declare (salience 100))
     (not (UPDATER-BEL__init))
     (status (step ?s) (time ?t)) 
+    (K-agent (step ?o-s)
+                (time ?o-t)
+                (pos-r ?o-r) 
+            	(pos-c ?o-c) 
+            	(direction ?o-dir) 
+            	(l-drink ?o-ld)
+                (l-food ?o-lf)
+                (l_d_waste ?o-ldw)
+                (l_f_waste ?o-lfw)
+    )
     (not (K-agent (step ?s) (time ?t)))
     =>
         (assert (UPDATER-BEL__init)) 
         (assert (UPDATER-BEL__runonce))
+        (assert (UPDATER-BEL__exec-history-runonce))
         (assert (printGUI (time ?t) (step ?s) (source "AGENT::UPDATER-BEL") (verbosity 2) (text  "UPDATER-BEL Module invoked")))
-        (assert (K-agent (step ?s) (time ?t)))
+        (assert (K-agent (step ?s)
+                    (time ?t) 
+                    (pos-r ?o-r) 
+                	(pos-c ?o-c) 
+                	(direction ?o-dir) 
+                	(l-drink ?o-ld)
+                    (l-food ?o-lf)
+                    (l_d_waste ?o-ldw)
+                    (l_f_waste ?o-lfw))
+        )
 )
 
 (defrule init-rule-no-new-step
@@ -25,6 +45,7 @@
     =>
         (assert (UPDATER-BEL__init)) 
         (assert (UPDATER-BEL__runonce))
+        (assert (UPDATER-BEL__exec-history-runonce))
         (assert (printGUI (time ?t) (step ?s) (source "AGENT::UPDATER-BEL") (verbosity 2) (text  "UPDATER-BEL Module invoked")))
 )
 
@@ -263,22 +284,22 @@
     (retract ?p)
 )          
 
-(defrule percp-load
-    (status (step ?s))
-    ?p <- (perc-load
-            (step ?s)
-            (time ?t)		
-	        (load ?load)
-          )		
-
-    =>
-
-    (assert (dummy))
-    (assert (printGUI (time ?t) (step ?s) (source "AGENT::UPDATER-BEL") (verbosity 2) (text  "Perceived Load (%p1)") (param1 ?load)))
-    ;do something
-
-    (retract ?p)
-) 
+;(defrule percp-load
+;    (status (step ?s))
+;    ?p <- (perc-load
+;            (step ?s)
+;            (time ?t)		
+;	        (load ?load)
+;          )		
+;
+;    =>
+;
+;    (assert (dummy))
+;    (assert (printGUI (time ?t) (step ?s) (source "AGENT::UPDATER-BEL") (verbosity 2) (text  "Perceived Load (%p1)") (param1 ?load)))
+;    ;do something
+;
+;    (retract ?p)
+;) 
 
 ;Percezione tavolo da pulire (dopo CheckFinish)
 (defrule percp-finish
@@ -296,6 +317,110 @@
 
     (retract ?p)
 )
+
+;### Aggiornamento Belief in base alle azioni precedenti ###
+
+;Aggiorna stato carico food con percezione Load e azione precedente LoadFood
+(defrule percp-load-lastaction-LoadFood 
+    (status (step ?s))
+    ?p <- (perc-load
+            (step ?s)
+            (time ?t)		
+	        (load ?load)
+          )		
+    (exec-history (step =(- ?s 1)) (action LoadFood) (param1 ?p1) (param2 ?p2) (param3 ?p3))
+    ?ka <- (K-agent (step ?s) (time ?t) (l-food ?l-food))   
+    =>
+        (assert (printGUI (time ?t) (step ?s) (source "AGENT::UPDATER-BEL") (verbosity 2) (text  "Perceived Load (%p1) with LoadFood, current Food (%p2)") (param1 ?load) (param2 (+ 1 ?l-food))))
+        (modify ?ka (l-food (+ 1 ?l-food)))    
+        (retract ?p)
+)
+
+;Aggiorna stato carico food con percezione Load e azione precedente LoadDrink
+(defrule percp-load-lastaction-LoadDrink
+    (status (step ?s))
+    ?p <- (perc-load
+            (step ?s)
+            (time ?t)		
+	        (load ?load)
+          )		
+    (exec-history (step =(- ?s 1)) (action LoadDrink) (param1 ?p1) (param2 ?p2) (param3 ?p3))
+    ?ka <- (K-agent (step ?s) (time ?t) (l-drink ?l-drink))   
+    =>
+        (assert (printGUI (time ?t) (step ?s) (source "AGENT::UPDATER-BEL") (verbosity 2) (text  "Perceived Load (%p1) with LoadDrink, current Drink (%p2)") (param1 ?load) (param2 (+ 1 ?l-drink))))
+        (modify ?ka (l-drink (+ 1 ?l-drink)))    
+        (retract ?p)
+)
+
+;Aggiorna stato carico food con percezione Load e azione precedente DeliveryFood
+(defrule percp-load-lastaction-DeliveryFood
+    (status (step ?s))
+    ?p <- (perc-load
+            (step ?s)
+            (time ?t)		
+	        (load ?load)
+          )		
+    (exec-history (step =(- ?s 1)) (action DeliveryFood) (param1 ?p1) (param2 ?p2) (param3 ?p3))
+    ?ka <- (K-agent (step ?s) (time ?t) (l-food ?l-food))   
+    =>
+        (assert (printGUI (time ?t) (step ?s) (source "AGENT::UPDATER-BEL") (verbosity 2) (text  "Perceived Load (%p1) with DeliveryFood, current Food (%p2)") (param1 ?load) (param2 (- ?l-food 1))))
+        (modify ?ka (l-food (- ?l-food 1)))    
+        (retract ?p)
+)
+
+;Aggiorna stato carico food con percezione Load e azione precedente DeliveryDrink
+(defrule percp-load-lastaction-DeliveryDrink
+    (status (step ?s))
+    ?p <- (perc-load
+            (step ?s)
+            (time ?t)		
+	        (load ?load)
+          )		
+    (exec-history (step =(- ?s 1)) (action DeliveryDrink) (param1 ?p1) (param2 ?p2) (param3 ?p3))
+    ?ka <- (K-agent (step ?s) (time ?t) (l-drink ?l-drink))   
+    =>
+        (assert (printGUI (time ?t) (step ?s) (source "AGENT::UPDATER-BEL") (verbosity 2) (text  "Perceived Load (%p1) with DeliveryDrink, current Drink (%p2)") (param1 ?load) (param2 (- ?l-drink 1))))
+        (modify ?ka (l-drink (- ?l-drink 1)))    
+        (retract ?p)
+)
+
+;Aggiorna stato azione precedente CleanTable
+(defrule update-lastaction-CleanTable 
+    (status (step ?s))	
+    (exec-history (step =(- ?s 1)) (action CleanTable) (param1 ?p1) (param2 ?p2) (param3 ?p3))
+    ?ka <- (K-agent (step ?s) (time ?t) (l_f_waste ?lw-food) (l_d_waste ?lw-drink))   
+    ?f <- (UPDATER-BEL__exec-history-runonce)
+    =>
+        (assert (printGUI (time ?t) (step ?s) (source "AGENT::UPDATER-BEL") (verbosity 2) (text  "After CleanTable loaded Waste Food and Drink")))
+        (modify ?ka (l_f_waste yes) (l_d_waste yes))    
+        (retract ?f)
+)
+
+;Aggiorna stato azione precedente EmptyFood
+(defrule update-lastaction-EmptyFood 
+    (status (step ?s))	
+    (exec-history (step =(- ?s 1)) (action EmptyFood) (param1 ?p1) (param2 ?p2) (param3 ?p3))
+    ?ka <- (K-agent (step ?s) (time ?t) (l_f_waste ?lw-food) (l_d_waste ?lw-drink))   
+    ?f <- (UPDATER-BEL__exec-history-runonce)
+    =>
+        (assert (printGUI (time ?t) (step ?s) (source "AGENT::UPDATER-BEL") (verbosity 2) (text  "After EmptyFood empty Waste Food")))
+        (modify ?ka (l_f_waste no))    
+        (retract ?f)
+)
+
+;Aggiorna stato azione precedente Release (EmptyDrink)
+(defrule update-lastaction-Release 
+    (status (step ?s))	
+    (exec-history (step =(- ?s 1)) (action Release) (param1 ?p1) (param2 ?p2) (param3 ?p3))
+    ?ka <- (K-agent (step ?s) (time ?t) (l_f_waste ?lw-food) (l_d_waste ?lw-drink))   
+    ?f <- (UPDATER-BEL__exec-history-runonce)
+    =>
+        (assert (printGUI (time ?t) (step ?s) (source "AGENT::UPDATER-BEL") (verbosity 2) (text  "After Release empty Waste Drink")))
+        (modify ?ka (l_d_waste no))    
+        (retract ?f)
+)
+
+;### TODO: CheckFinish ?? ###
 
 (defrule dispose
     (declare (salience -100))
