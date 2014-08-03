@@ -96,7 +96,7 @@
     =>
     (halt); for debug purpose
     (printout t "(HALTED FOR DEBUG) Esiste soluzione per goal (" ?r "," ?c ") con costo "  ?g crlf)
-    (assert (stampa ?id 1))
+    (assert (stampa ?id 0 -1))
     (assert (path-planning-result (success yes)))
 )
 
@@ -110,25 +110,37 @@
     =>
     (halt); for debug purpose
     (printout t "(HALTED FOR DEBUG) Esiste soluzione per goal (" ?r "," ?c ") con costo "  ?g crlf)
-    (assert (stampa ?id 1))
+    (assert (stampa ?id 0 -1))
     (assert (path-planning-result (success yes)))
 )
 
 ;Stampa soluzione
 (defrule stampaSol
-(declare (salience 101))
-?f<-(stampa ?id ?seq)
+(declare (salience 110))
+?f<-(stampa ?id ?seq ?rev)
     (node (ident ?id) (father ?anc&~NA))  
     (pp-exec ?anc ?id ?oper ?r ?c)
 => (printout t " " ?seq ") Eseguo azione " ?oper " da stato (" ?r "," ?c ") " crlf)
-   (assert (path-planning-action (sequence ?seq) (operator ?oper)))
-   (assert (stampa ?anc (+ 1 ?seq)))
+   (assert (path-planning-action (sequence ?rev) (operator ?oper)))
+   (assert (stampa ?anc (+ 1 ?seq) (- ?rev 1)))
    (retract ?f)
 )
 
+;Inverti ordine soluzione
+(defrule invertiStampaSol
+    (declare (salience 105))
+    ?f<-(stampa ?id ?seq ?rev)
+    ?f1<-(path-planning-action (sequence ?act-seq&:(< ?act-seq 0)))
+    =>
+        (modify ?f1 (sequence (+ ?act-seq ?seq)))
+        ;(retract ?f)       
+        ;(assert (stampa ?id ?seq (+ ?rev 1)))       
+)
+
+;Stampa soluzione fine
 (defrule stampa-fine
-(declare (salience 102))
-       (stampa ?id $?)
+    (declare (salience 102))
+       ?f <- (stampa ?id $?)
        (node (ident ?id) (father ?anc&NA))
        (open-worse ?worse)
        (open-better ?better)
@@ -139,6 +151,7 @@
    (printout t " stati generati gi� in open (open-worse) " ?worse crlf)
    (printout t " stati generati gi� in open (open-better) " ?better crlf)
    (assert (ppclean))
+   (retract ?f)
 ;   (pop-focus)
 )
 
@@ -195,10 +208,11 @@
 (defrule clean-pp-end
     (declare (salience 999))
     ?f <- (ppclean)
-    ?fi <- (init)
+    ?fi <- (PATH-PLANNER__init)
     =>
     (retract ?f)
     (retract ?fi)
+    (halt)
     (pop-focus)
 )
 

@@ -151,15 +151,30 @@
     (assert (basic-actions-seq 0))
 )
 
- ;### BDI Control Loop ###
+;### TEMPORARY: Static Plan Test ###
+(defrule test_static_plan
+    (declare (salience 120))
+    ?f <- (AGENT__runonce)
+    =>
+        (retract ?f)
+        (assert (plan-action (seq 0) (action Goto) (param1 7) (param2 6)))
+        (assert (plan-action (seq 1) (action LoadFood) (param1 7) (param2 5) (param3 1)))
+        (assert (plan-action (seq 2) (action LoadDrink) (param1 7) (param2 7) (param3 1)))
+        (assert (plan-action (seq 3) (action Goto) (param1 6) (param2 6)))
+        (assert (plan-action (seq 4) (action DeliveryFood) (param1 5) (param2 6) (param3 1)))
+        (assert (plan-action (seq 5) (action DeliveryDrink) (param1 5) (param2 6) (param3 1)))
+        (assert (plan-action (seq 6) (action Goto) (param1 7) (param2 6)))
+)
+
+;### BDI Control Loop ###
 
 ; Initilization
 (defrule BDI_loop_0
     (declare (salience 100))
-    (not (init))
+    (not (AGENT__init))
     (status (step ?s) (time ?t))    
     =>
-        (assert (init))
+        (assert (AGENT__init))
         (assert (printGUI (time ?t) (step ?s) (source "AGENT") (verbosity 2) (text  "BDI Loop started !")))
         (assert (actions_retry_counter 0))
         (assert (BDistatus BDI-1))
@@ -171,8 +186,9 @@
     ?bdis <- (BDistatus BDI-1)
     (status (step ?s))
     ?fs <- (last-perc (step ?old-s))    
-    (test (> ?s ?old-s))
+    (test (> ?s ?old-s))  
     =>
+        (modify ?fs (step ?s)) ;For the GUI Step Mode
         (retract ?bdis)
         (assert (BDistatus BDI-2))
         (focus UPDATE-BEL)    ;Update Belief Module Invoked
@@ -217,10 +233,11 @@
 (defrule BDI_loop_3
     (declare (salience 85))
     ?bdis <- (BDistatus BDI-3)    
-    (status (step ?s))        
+    (status (step ?s) (time ?t))        
     =>
         (retract ?bdis)
         ;### TODO: Deliberate 
+        (assert (printGUI (time ?t) (step ?s) (source "AGENT") (verbosity 2) (text  "BDI - Deliberating !")))
         (assert (BDistatus BDI-4))
 )
 
@@ -228,10 +245,12 @@
 (defrule BDI_loop_4
     (declare (salience 80))
     ?bdis <- (BDistatus BDI-4)    
-    (status (step ?s))        
+    (status (step ?s) (time ?t))        
     =>
         (retract ?bdis)
         ;### TODO: Plan if needed 
+        ;modify (assert (plan-actions-seq 0))
+        (assert (printGUI (time ?t) (step ?s) (source "AGENT") (verbosity 2) (text  "BDI - Planning !")))
         (assert (BDistatus BDI-5))
 )
 
@@ -240,7 +259,8 @@
     (declare (salience 75))
     ;### TODO: Check if needed to replan
     ?bdis <- (BDistatus BDI-5)
-    (not (basic-actions));### TODO: Add or condition (actions_retry_counter ?art&:(> ?art 0)))    
+    ;(not (basic-action));### TODO: Add or condition (actions_retry_counter ?art&:(> ?art 0)))    
+    (or (not (basic-action)) (actions_retry_counter ?art&:(> ?art 0)))    
     (plan-actions-seq ?seq)
     ?baseq-f <- (basic-actions-seq ?ba-seq)
     (plan-action (seq ?seq)
@@ -248,14 +268,43 @@
             (param1 ?p1)
             (param2 ?p2)
             (param3 ?p3))
-    (status (step ?s))        
+    (status (step ?s) (time ?t))        
     =>
+        (assert (printGUI (time ?t) (step ?s) (source "AGENT") (verbosity 2) (text  "BDI - Actions planning for plan action (%p1,%p2,%p3,%p4)") (param1 ?plan-action) (param2 ?p1) (param3 ?p2) (param4 ?p3)))
         (retract ?bdis)
         (assert (ACTIONS-PLANNER-decode-action (action ?plan-action) (param1 ?p1) (param2 ?p2) (param3 ?p3)))
         (focus ACTIONS-PLANNER) ;Decode planning actions to basic actions
         (assert (BDistatus BDI-6))
         (retract ?baseq-f) ;Reset Basic Action Sequence Counter
         (assert (basic-actions-seq 0))
+)
+
+;Actions-Planning- No replan -> Execute next action if there is one
+(defrule BDI_loop_5_no_replan_other_actions
+    (declare (salience 74))
+    ?bdis <- (BDistatus BDI-5)     
+    ?baseq-f <- (basic-actions-seq ?ba-seq)   
+    (basic-action)
+    (status (step ?s) (time ?t))        
+    =>
+        (retract ?bdis)
+        (assert (BDistatus BDI-6))
+)
+
+;Actions-Planning- No plan -> Wait
+(defrule BDI_loop_5_no_plan
+    (declare (salience 74))
+    ?bdis <- (BDistatus BDI-5)     
+    ?baseq-f <- (basic-actions-seq ?ba-seq)   
+    (not (basic-action))
+    (status (step ?s) (time ?t))        
+    =>
+        (assert (printGUI (time ?t) (step ?s) (source "AGENT") (verbosity 2) (text  "BDI - Nothing to do, will Wait !")))
+        (assert (exec (step ?s) (action Wait))) ;Waiting action
+        (retract ?baseq-f) ;Reset Basic Action Sequence Counter
+        (assert (basic-actions-seq 0))
+        (retract ?bdis)
+        (assert (BDistatus BDI-EXEC-ACTION))
 )
 
 ;Exec head basic action if possible
@@ -274,28 +323,41 @@
     =>
         (retract ?bdis)
         (retract ?ba-f)
-        (assert (exec (step ?s) (action ?action)))
+        (assert (exec (step ?s) (action ?action) (param1 ?p1) (param2 ?p2) (param3 ?p3)))
         (retract ?baseq-f) ;Advance Basic Action Sequence Counter
         (assert (basic-actions-seq (+ 1 ?baseq)))
         (assert (BDistatus BDI-EXEC-check-plan))
 )
 
 ;Check Empty basic actions -> Remove plan -> next rule
-(defrule BDI-EXEC-check-plan  
+(defrule BDI-EXEC-check-plan-empty
     (declare (salience 50))
     ?bdis <- (BDistatus BDI-EXEC-check-plan)
     (status (step ?i) (time ?t))
     (not (basic-action))
+    ?paseq <- (plan-actions-seq ?seq)
     ?pa <- (plan-action (seq ?seq) (action ?action))
     =>
         (assert (printGUI (time ?t) (step ?i) (source "AGENT") (verbosity 1) (text  "No more basic actions for plan action (%p1-%p2), removing plan action.") (param1 ?seq) (param2 ?action)))      
         (retract ?pa)
         (retract ?bdis)
-        (assert (BDistatus BDI-EXEC-check-intention))              
+        (assert (BDistatus BDI-EXEC-check-intention))   
+        (retract ?paseq)
+        (assert (plan-actions-seq (+ 1 ?seq)));Next Plan action           
+)
+
+;Check Empty basic actions -> plan not empy -> next rule
+(defrule BDI-EXEC-check-plan-not-empy
+    (declare (salience 50))
+    ?bdis <- (BDistatus BDI-EXEC-check-plan)
+    (status (step ?i) (time ?t))
+    =>
+        (retract ?bdis)
+        (assert (BDistatus BDI-EXEC-check-intention))        
 )
 
 ;Check Empty plan -> Remove intention and related desire -> execute action next rule
-(defrule BDI-EXEC-check-intention  
+(defrule BDI-EXEC-check-intention-empty 
     (declare (salience 45))
     ?bdis <- (BDistatus BDI-EXEC-check-intention)
     (status (step ?i) (time ?t))
@@ -308,6 +370,7 @@
         (retract ?desire)            
 )
 
+;Check Empty plan -> No more empty plan -> execute action next rule
 (defrule BDI-EXEC-check-intention-end
     (declare (salience 40))
     ?bdis <- (BDistatus BDI-EXEC-check-intention)
@@ -362,16 +425,17 @@
     (declare (salience 20))
     ?bdis <- (BDistatus BDI-EXEC-ACTION)
     (status (step ?i) (time ?t))
-    (exec (step ?i) (action ?oper))   
-    ?f <- (init) 
+    (exec (step ?i) (action ?oper) (param1 ?p1) (param2 ?p2) (param3 ?p3))   
+    ?f <- (AGENT__init) 
     =>
         (printout t crlf  "== AGENT ==" crlf) (printout t "Start the execution of the action: " ?oper)
-        (assert (printGUI (time ?t) (step ?i) (source "AGENT") (verbosity 1) (text  "Start the execution of the action: %p1") (param1 ?oper)))      
+        (assert (printGUI (time ?t) (step ?i) (source "AGENT") (verbosity 1) (text  "Start the execution of the action: %p1 (%p2,%p3,%p4)") (param1 ?oper) (param2 ?p1) (param3 ?p2) (param4 ?p3)))      
         (retract ?bdis)
         (assert (BDistatus BDI-0))      
         (retract ?f)
         (pop-focus)
 )
+;### TODO: Update belief upon action execution (robot loaded, table status, etc)
 
 ;(defrule BDI_loop
 ;    (status (step ?s))

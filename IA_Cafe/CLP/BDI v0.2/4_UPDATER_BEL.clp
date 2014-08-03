@@ -120,9 +120,9 @@
     ?ka <- (K-agent (step ?s) (time ?t))
     (status (step ?s))
     ?p <- (perc-vision (step ?s) (time ?t) (pos-r ?r) (pos-c ?c) (direction north)
-      		(perc1 ?x7) (perc2 ?x4) (perc3 ?x1)
-			(perc4 ?x8) (perc5 ?x5) (perc6 ?x2)
-			(perc7 ?x9) (perc8 ?x6) (perc9 ?x3)
+      		(perc1 ?x3) (perc2 ?x6) (perc3 ?x9)
+			(perc4 ?x2) (perc5 ?x5) (perc6 ?x8)
+			(perc7 ?x1) (perc8 ?x4) (perc9 ?x7)
     ) 
     ;ATTENZIONE !! Riordino le variabili per non cambiare i numeri di r e c delle celle (ma siccome le
     ; perc dell'ENV arrivano ordinate in altro modo, funziona usando la regola WEST).
@@ -157,10 +157,10 @@
 (defrule perc-south
     ?ka <- (K-agent (step ?s) (time ?t))
     (status (step ?s))
-    ?p <- (perc-vision (step ?s) (time ?t) (pos-r ?r) (pos-c ?c) (direction south)
-            (perc1 ?x3) (perc2 ?x6) (perc3 ?x9)
-			(perc4 ?x2) (perc5 ?x5) (perc6 ?x8)
-			(perc7 ?x1) (perc8 ?x4) (perc9 ?x7)
+    ?p <- (perc-vision (step ?s) (time ?t) (pos-r ?r) (pos-c ?c) (direction south)           
+            (perc1 ?x7) (perc2 ?x4) (perc3 ?x1)
+			(perc4 ?x8) (perc5 ?x5) (perc6 ?x2)
+			(perc7 ?x9) (perc8 ?x6) (perc9 ?x3)
     ) ;estraggo tutte le percezioni delle celle adiacenti
     ;ATTENZIONE !! Riordino le variabili per non cambiare i numeri di r e c delle celle:
     ;    DIR WEST

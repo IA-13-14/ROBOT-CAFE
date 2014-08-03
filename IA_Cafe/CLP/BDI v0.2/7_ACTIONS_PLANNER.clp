@@ -13,13 +13,13 @@
 ; Initilization
 (defrule init-rule
     (declare (salience 100))
-    (not (init))
+    (not (ACTIONS-PLANNER__init))
     (status (step ?s) (time ?t))    
     =>
-        (assert (init)) 
+        (assert (ACTIONS-PLANNER__init)) 
         (assert (runonce))
         (assert (printGUI (time ?t) (step ?s) (source "AGENT::ACTIONS-PLANNER") (verbosity 2) (text  "ACTIONS-PLANNER Module invoked")))
-        (assert (actions-seq 1))
+        (assert (actions-seq 0))
 )
 
 ;End runonce section
@@ -38,7 +38,7 @@
         (retract ?f)
         ;calcolo percorso con PATH_PLANNER
         (assert (start-path-planning (source-direction ?dir) (source-r ?r) (source-c ?c)
-                                 (dest-direction any) (dest-r (+ 1 ?d-r)) (dest-c ?d-c)))
+                                 (dest-direction any) (dest-r ?d-r) (dest-c ?d-c)))
         (focus PATH-PLANNER)
         (assert (decoding Goto ?d-r ?d-c))
 )
@@ -67,7 +67,7 @@
 
 (defrule path-planner-result-yes
     (declare (salience 48))
-    (decoding Goto)
+    (decoding Goto $?)
     ?f <- (actions-seq ?seq)
     (path-planning-result (success yes))
     (path-planning-action (sequence ?seq) (operator ?oper))
@@ -85,7 +85,7 @@
 )
 
 (defrule decode-Goto-clean-2
-    (declare (salience -5))
+    (declare (salience -6))
     ?f <- (path-planning-action (sequence ?seq) (operator ?oper))
     =>
         (retract ?f)
@@ -109,8 +109,8 @@
 
 ;Decode requested quantity
 (defrule decode-LoadDrink-LoadFood-DeliveryDrink-DeliveryFood-1
-    ?f <- (decoding ?action&LoadDrink|LoadFood|DeliveryDrink|DeliveryFood ?r ?c ?qty)
-    ?f1 <- (actions-seq ?seq&:(> ?seq 0))
+    ?f <- (decoding ?action&LoadDrink|LoadFood|DeliveryDrink|DeliveryFood ?r ?c ?qty&:(> ?qty 0))
+    ?f1 <- (actions-seq ?seq)
     =>
         (assert (basic-action (seq ?seq) (action ?action) (param1 ?r) (param2 ?c)))
         (retract ?f)
@@ -131,8 +131,9 @@
 ;Dispose
 (defrule dispose
     (declare (salience -100))
-    ?f <- (init)
+    ?f <- (ACTIONS-PLANNER__init)
     =>
         (retract ?f)
+        (halt)
         (pop-focus)
 )
