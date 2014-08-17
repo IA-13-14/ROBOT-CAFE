@@ -46,18 +46,8 @@
 ;    (retract ?f)
 ;)
 
-(deffunction table-pos-r (?table)
-    (switch ?table
-      (case T4 then 6)
-      (case T3 then 8)
-    )
-)
-
-(deffunction table-pos-c (?table)
-    (switch ?table
-      (case T4 then 6)
-      (case T3 then 8)
-    )
+(deffunction manh-cost(?r ?c ?d-r ?d-c)
+    (* 2 (+ (abs (- ?d-r ?r)) (abs (- ?d-c ?c)) ))
 )
 
 ;#### Serve table plan ####
@@ -76,6 +66,8 @@
             (drink ?drink)
     )
     (status (step ?s) (time ?t))
+    (K-agent (step ?s) (pos-r ?ag-r) (pos-c ?ag-c))
+    (Table (table-id ?tab) (pos-r ?tabr) (pos-c ?tabc))
     =>
         (assert (printGUI (time ?t) (step ?s) (source "AGENT::PLANNER") (verbosity 2) (text  "Planning for intention (Type:%p1,T:%p2,F:%p3,D:%p4)") (param1 order) (param2 ?tab) (param3 ?food) (param4 ?drink)))
         (assert (planning (type order) (step 1) (pseq 0) (param1 ?ordid) (param2 ?tab) (param3 ?food) (param4 ?drink)))
@@ -85,7 +77,8 @@
         (assert (var foodOnBoard 0))
         (assert (var drinkOnBoard 0))
         (assert (var freeSlots ?*SLOTS*))
-        (assert (var tablepos (table-pos-r ?tab) (table-pos-c ?tab)))
+        (assert (var tablepos ?tabr ?tabc))
+        (assert (var agentPos ?ag-r ?ag-c))
 )
 
 ;Planning for serve order - While A - True
@@ -115,7 +108,6 @@
 ;TODO: Precedenza a food o drink o calcolo in base alle richieste ?
 
 ;Planning for serve order - If B - True
-;TODO: Determinare posizione migliore per FD !
 (defrule serve-order-if-foods-to-load-true
     (declare (salience 98))
     ?f <- (PLANNER__runonce)
@@ -124,11 +116,17 @@
     ?vlf <- (var loadedFood ?lf)
     ?vfb <- (var foodOnBoard ?fb)
     (and (test (> ?food ?lf)) (test (> ?slots 0)))
+    ;FD Best position
+    ?vpos <- (var agentPos ?ag-r ?ag-c)
+    (access-cell (object FD) (obj-r ?fd-r) (obj-c ?fd-c) (pos-r ?r) (pos-c ?c))
+    (not (access-cell (object FD) (pos-r ?r1) (pos-c ?c1&:(> (manh-cost ?ag-r ?ag-c ?r ?c) (manh-cost ?ag-r ?ag-c ?r1 ?c1)))))
     =>
         ;Goto FD
-        (assert (plan-action (seq ?pseq) (action Goto) (param1 7) (param2 6)))
+        (assert (plan-action (seq ?pseq) (action Goto) (param1 ?r) (param2 ?c)))
+        (retract ?vpos)
+        (assert (var agentPos ?r ?c))
         ;Load Food (min needed and possible qty)
-        (assert (plan-action (seq (+ 1 ?pseq)) (action LoadFood) (param1 7) (param2 5) (param3 (min ?slots (- ?food ?lf)))))
+        (assert (plan-action (seq (+ 1 ?pseq)) (action LoadFood) (param1 ?fd-r) (param2 ?fd-c) (param3 (min ?slots (- ?food ?lf)))))
         ;update vars
         (retract ?vslots)
         (assert (var freeSlots (- ?slots (min ?slots (- ?food ?lf)))))
@@ -149,7 +147,6 @@
 )
 
 ;Planning for serve order - If C - True
-;TODO: Determinare posizione migliore per DD !
 (defrule serve-order-if-drinks-to-load-true
     (declare (salience 96))
     ?f <- (PLANNER__runonce)
@@ -158,11 +155,17 @@
     ?vld <- (var loadedDrink ?ld)
     ?vdb <- (var drinkOnBoard ?db)
     (and (test (> ?drink ?ld)) (test (> ?slots 0)))
+    ;DD Best position
+    ?vpos <- (var agentPos ?ag-r ?ag-c)
+    (access-cell (object DD) (obj-r ?dd-r) (obj-c ?dd-c) (pos-r ?r) (pos-c ?c))
+    (not (access-cell (object DD) (pos-r ?r1) (pos-c ?c1&:(> (manh-cost ?ag-r ?ag-c ?r ?c) (manh-cost ?ag-r ?ag-c ?r1 ?c1)))))
     =>
         ;Goto DD
-        (assert (plan-action (seq ?pseq) (action Goto) (param1 7) (param2 6)))
+        (assert (plan-action (seq ?pseq) (action Goto) (param1 ?r) (param2 ?c)))
+        (retract ?vpos)
+        (assert (var agentPos ?r ?c))
         ;Load Drink (min needed and possible qty)
-        (assert (plan-action (seq (+ 1 ?pseq)) (action LoadDrink) (param1 7) (param2 7) (param3 (min ?slots (- ?drink ?ld)))))
+        (assert (plan-action (seq (+ 1 ?pseq)) (action LoadDrink) (param1 ?dd-r) (param2 ?dd-c) (param3 (min ?slots (- ?drink ?ld)))))
         ;update vars
         (retract ?vslots)
         (assert (var freeSlots (- ?slots (min ?slots (- ?drink ?ld)))))
@@ -183,15 +186,20 @@
 )
 
 ;Planning for serve order - goto Table
-;TODO: Find table position !
 (defrule serve-order-goto-table
     (declare (salience 95))
     ?f <- (PLANNER__runonce)
     ?pln <- (planning (type order) (step 4) (pseq ?pseq) (param1 ?ordid) (param2 ?tab) (param3 ?food) (param4 ?drink))
     (var tablepos ?tabr ?tabc)
+    ;Table Best position
+    ?vpos <- (var agentPos ?ag-r ?ag-c)
+    (access-cell (object Table) (obj-r ?tabr) (obj-c ?tabc) (pos-r ?r) (pos-c ?c))
+    (not (access-cell (object Table) (obj-r ?tabr) (obj-c ?tabc) (pos-r ?r1) (pos-c ?c1&:(> (manh-cost ?ag-r ?ag-c ?r ?c) (manh-cost ?ag-r ?ag-c ?r1 ?c1)))))
     =>
         ;Goto Table
-        (assert (plan-action (seq ?pseq) (action Goto) (param1 ?tabr) (param2 ?tabc)))   
+        (assert (plan-action (seq ?pseq) (action Goto) (param1 ?r) (param2 ?c)))  
+        (retract ?vpos)
+        (assert (var agentPos ?r ?c)) 
         (modify ?pln (step 5) (pseq (+ 1 ?pseq)))
 )
 
@@ -204,7 +212,7 @@
     ?vlf <- (var loadedFood ?lf)
     ?vfb <- (var foodOnBoard ?fb)
     (and (test (>= ?food ?lf)) (test (> ?fb 0)))
-    (Table (table-id ?tab) (pos-r ?tabr) (pos-c ?tabc))
+    (var tablepos ?tabr ?tabc)
     =>
         ;Delivery Food
         (assert (plan-action (seq ?pseq) (action DeliveryFood) (param1 ?tabr) (param2 ?tabc) (param3 ?fb)))
@@ -234,7 +242,7 @@
     ?vld <- (var loadedDrink ?ld)
     ?vdb <- (var drinkOnBoard ?db)
     (and (test (>= ?drink ?ld)) (test (> ?db 0)))
-    (Table (table-id ?tab) (pos-r ?tabr) (pos-c ?tabc))
+    (var tablepos ?tabr ?tabc)
     =>
         ;Delivery Drink
         (assert (plan-action (seq ?pseq) (action DeliveryDrink) (param1 ?tabr) (param2 ?tabc) (param3 ?db)))

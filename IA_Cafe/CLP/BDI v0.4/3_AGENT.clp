@@ -30,6 +30,15 @@
     (slot l_f_waste)
 )
 
+;### Template to store robot-accessible cells around Tables, FDs and so on ###
+(deftemplate access-cell
+    (slot object (allowed-values Table TB RB DD FD))
+    (slot pos-r)
+    (slot pos-c)
+    (slot obj-r)
+    (slot obj-c)
+)
+
 ;### Action Execution History Template ###
 (deftemplate exec-history 
 	(slot step) 	
@@ -131,7 +140,7 @@
 ;End -- #### MODULE PATH_PLANNER Templates ####
 
 (defrule  beginagent1
-    (declare (salience 11))
+    (declare (salience 20))
     (status (step 0))
     ;(not (exec (step 0)))
     ;#GUI#
@@ -142,8 +151,43 @@
     (assert (req-id-counter 0))
 )
             
+;Gets robot-accessible cells around FD, DD, Tables, etc.
+(defrule  beginagent_map_accessible_object_cell_north
+    (declare (salience 15))    
+    (not (init-agent (done yes)))
+    (K-cell (pos-r ?r) (pos-c ?c) (contains ?obj&~Wall&~Person&~Empty&~Parking&~Seat) (initial yes))
+    (K-cell (pos-r ?r2&:(= ?r2(+ ?r 1))) (pos-c ?c) (contains ?obj2&Parking|Empty) (initial yes))
+    =>
+        (assert (access-cell (object ?obj) (obj-r ?r) (obj-c ?c) (pos-r ?r2) (pos-c ?c)))            
+)
 
+(defrule  beginagent_map_accessible_object_cell_south
+    (declare (salience 15))    
+    (not (init-agent (done yes)))
+    (K-cell (pos-r ?r) (pos-c ?c) (contains ?obj&~Wall&~Person&~Empty&~Parking&~Seat) (initial yes))
+    (K-cell (pos-r ?r2&:(= ?r2(- ?r 1))) (pos-c ?c) (contains ?obj2&Parking|Empty) (initial yes))
+    =>
+        (assert (access-cell (object ?obj) (obj-r ?r) (obj-c ?c) (pos-r ?r2) (pos-c ?c)))            
+)
 
+(defrule  beginagent_map_accessible_object_cell_east
+    (declare (salience 15))    
+    (not (init-agent (done yes)))
+    (K-cell (pos-r ?r) (pos-c ?c) (contains ?obj&~Wall&~Person&~Empty&~Parking&~Seat) (initial yes))
+    (K-cell (pos-r ?r) (pos-c ?c2&:(= ?c2(+ ?c 1))) (contains ?obj2&Parking|Empty) (initial yes))
+    =>
+        (assert (access-cell (object ?obj) (obj-r ?r) (obj-c ?c) (pos-r ?r) (pos-c ?c2)))            
+)
+
+(defrule  beginagent_map_accessible_object_cell_west
+    (declare (salience 15))    
+    (not (init-agent (done yes)))
+    (K-cell (pos-r ?r) (pos-c ?c) (contains ?obj&~Wall&~Person&~Empty&~Parking&~Seat) (initial yes))
+    (K-cell (pos-r ?r) (pos-c ?c2&:(= ?c2(- ?c 1))) (contains ?obj2&Parking|Empty) (initial yes))
+    =>
+        (assert (access-cell (object ?obj) (obj-r ?r) (obj-c ?c) (pos-r ?r) (pos-c ?c2)))            
+)
+;----
  
 (defrule  beginagent2
     (declare (salience 11))
@@ -166,14 +210,6 @@
     (assert (plan-actions-seq 0))
     (assert (basic-actions-seq 0))
     (assert (intentions_changed (changed no)))
-)
-
-;### TEMPORARY: Static Plan Test ###
-(defrule test_static_plan
-    (declare (salience 120))
-    ?f <- (AGENT__runonce)
-    =>
-        (retract ?f)     
 )
 
 ;### BDI Control Loop ###
@@ -383,6 +419,10 @@
         (assert (BDistatus BDI-EXEC-check-plan))
 )
 
+;####################### IMPORTANTE: Implementare il controllo sul forward in caso di persona !!! ed eventuale replan percorso ###################
+;####################### IMPORTANTE: Implementare il controllo sul forward in caso di persona !!! ed eventuale replan percorso ###################
+;####################### IMPORTANTE: Implementare il controllo sul forward in caso di persona !!! ed eventuale replan percorso ###################
+
 ;Exec head basic action if possible
 (defrule BDI_loop_6_possible_A_head
     (declare (salience 70))
@@ -395,7 +435,6 @@
                 (param2 ?p2)
                 (param3 ?p3))
     (status (step ?s)) 
-    ;### TODO: Check if action is possible
     =>
         (retract ?bdis)
         (retract ?ba-f)
@@ -404,6 +443,29 @@
         (assert (basic-actions-seq (+ 1 ?baseq)))
         (assert (BDistatus BDI-EXEC-check-plan))
 )
+
+;Exec head basic action if possible (goto check)
+;(defrule BDI_loop_6_possible_A_head_goto
+;    (declare (salience 70))
+;    ?bdis <- (BDistatus BDI-6)
+;    ?baseq-f <- (basic-actions-seq ?baseq)
+;    ?ba-f <- (basic-action
+;                (seq ?baseq)
+;                (action Forward)
+;                (param1 ?p1)
+;                (param2 ?p2)
+;                (param3 ?p3))
+;    (status (step ?s)) 
+;    (K-agent (step ?s) (pos-r ?r) (pos-c ?c))
+;    ;(K-cell (pos-r ?r 
+;    =>
+;        (retract ?bdis)
+;        (retract ?ba-f)
+;        (assert (exec (step ?s) (action ?action) (param1 ?p1) (param2 ?p2) (param3 ?p3)))
+;        (retract ?baseq-f) ;Advance Basic Action Sequence Counter
+;        (assert (basic-actions-seq (+ 1 ?baseq)))
+;        (assert (BDistatus BDI-EXEC-check-plan))
+;)
 
 ;Check Empty basic actions -> Remove plan -> next rule
 (defrule BDI-EXEC-check-plan-empty
@@ -455,47 +517,6 @@
         (assert (BDistatus BDI-EXEC-ACTION))              
 )
 
-;(defrule path-planner-result-exec-step
-;    (declare (salience 48))
-;    (status (step ?s) (time ?t))
-;    (not (exec (step ?s)))
-;    (path-planning-result (success yes))
-;    ?f <- (path-planner-seq ?seq)
-;    (path-planning-action (sequence ?seq) (operator ?oper))
-;    =>
-;        (printout t " " ?seq ") Eseguo azione " ?oper " da stato " crlf)
-;        (retract ?f)
-;        (assert (path-planner-seq (+ 1 ?seq)))
-;        (assert (exec (step ?s) (action (pp-oper-decode ?oper))))
-;)   
-
-;IMPORTANT: Assert one action per step, actions for future steps will be executed without returning to the agent.
-;(defrule BDI_loop_3_default
-;    ;(declare (salience 100))
-;    (status (step ?s))
-;    ?bdis <- (BDistatus 2)
-;    ?fs <- (last-perc (step ?old-s))
-;    (not (exec (step ?s)))
-;    =>        
-;        (modify ?fs (step ?s))
-;        (retract ?bdis)
-;        (assert  (BDistatus 0))
-;        (assert (exec (step ?s) (action Wait)))    
-; )   
-
-;(defrule BDI_loop_3
-;    ;(declare (salience 100))
-;    (status (step ?s))
-;    ?bdis <- (BDistatus 2)
-;    ?fs <- (last-perc (step ?old-s))
-;    =>        
-;        (modify ?fs (step ?s))
-;        (retract ?bdis)
-;        (assert  (BDistatus 0))        
-; )   
-
-
-
 ;Executes Action and reset module initialization
 (defrule BDI-EXEC-ACTION    
     (declare (salience 20))
@@ -519,63 +540,3 @@
 ;             Non serve a molto perchè non funziona per cleantable e per scarico rifiuti.
 ;             Tuttavia, si può usare questo sistema per implementare il risultato della CheckFinish, che però
 ;             per ora non si ritiene utile usare.
-
-
-
-;(defrule BDI_loop
-;    (status (step ?s))
-;    (BDistatus 2)
-;    =>
-;        ;remove perc        
-;        (focus DELIBERATE)
-; )
-
-; (defrule BDI_loop
-;    (status (step ?s))
-;    (BDistatus 3)
-;    =>
-;        ;remove perc        
-;        (focus PLANNER)
-; )
-
-; (defrule BDI_loop
-;    (status (step ?s))
-;    (BDistatus 4)
-;    =>
-;        ;remove perc        
-;        (focus ACTIONS-PLANNER)
-; )
-
- 
-;OLD default implementation
-;(defrule ask_act
-; ?f <-   (status (step ?i))
-;    =>  (printout t crlf crlf)
-;        (printout t "action to be executed at step:" ?i)
-;        (printout t crlf crlf)
-;        (modify ?f (result no)))
-
-
-;(defrule exec_act
-;    (status (step ?i))
-;    (exec (step ?i))
-; => (pop-focus))
-
-; alcune azioni per testare il sistema
-; (assert (exec (step 0) (action Forward)))
-; (assert (exec (step 1) (action Inform) (param1 T4) (param2 2) (param3 accepted)))
-; (assert (exec (step 2) (action LoadDrink) (param1 7) (param2 7)))
-; (assert (exec (step 3) (action LoadFood) (param1 7) (param2 5)))
-; (assert (exec (step 4) (action Forward)))
-; (assert (exec (step 5) (action DeliveryDrink) (param1 5) (param2 6)))
-; (assert (exec (step 6) (action DeliveryFood) (param1 5) (param2 6)))
-; (assert (exec (step 7) (action Inform) (param1 T3) (param2 20) (param3 delayed)))
-; (assert (exec (step 8) (action Inform) (param1 T3) (param2 16) (param3 delayed)))
-; (assert (exec (step 9) (action Turnleft)))
-; (assert (exec (step 10) (action Turnleft)))
-; (assert (exec (step 11) (action CleanTable) (param1 5) (param2 6)))
-; (assert (exec (step 12) (action Forward)))
-; (assert (exec (step 13) (action Forward)))
-; (assert (exec (step 14) (action Release) (param1 8) (param2 7)))
-; (assert (exec (step 15) (action EmptyFood) (param1 8) (param2 5)))
-; (assert (exec (step 16) (action Release) (param1 8) (param2 7)))
