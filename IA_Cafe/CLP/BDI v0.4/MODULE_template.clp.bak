@@ -1,0 +1,48 @@
+;######## MODULE: Belief Updater Module
+; Description:
+;
+;
+
+;TODO: Replace PATH-PLANNER with the name of the module
+
+;/-----------------------------------------------------------------------------------/
+;/*****    GESTIONE PERCEZIONI AMBIENTE (e aggiornamento opportuni fatti)       *****/
+;/-----------------------------------------------------------------------------------/
+(defmodule <MODULE-NAME> (import MAIN ?ALL) (import AGENT ?ALL) (export ?ALL))
+
+;WARNING: Deftemplates used by AGENT must be defined in AGENT Module !
+
+
+;Initilization
+(defrule <MODULE-NAME>__init-rule
+    (declare (salience 100))
+    (not (<MODULE-NAME>__init))
+    (status (step ?s) (time ?t))    
+    =>
+        (assert (<MODULE-NAME>__init)) 
+        (assert (<MODULE-NAME>__runonce))
+        (assert (printGUI (time ?t) (step ?s) (source "AGENT::<MODULE-NAME>") (verbosity 2) (text  "<MODULE-NAME> Module invoked")))
+)
+
+;runonce section
+(defrule clean-old-K-cell
+    (declare (salience 90))
+    (<MODULE-NAME>__runonce)
+    ;[...]
+)
+
+;End runonce section
+(defrule stop-runonce
+    ?f <- (<MODULE-NAME>__runonce)
+    =>
+    (retract ?f)
+)
+
+;Dispose
+(defrule dispose
+    (declare (salience -100))
+    ?f <- (<MODULE-NAME>__init)
+    =>
+        (retract ?f)
+        (pop-focus)
+)

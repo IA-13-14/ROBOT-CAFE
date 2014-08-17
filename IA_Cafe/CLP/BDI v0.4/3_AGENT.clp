@@ -2,6 +2,8 @@
 
 (defmodule AGENT (import MAIN ?ALL) (export ?ALL))
 
+(defglobal ?*SLOTS* = 4)
+
 ;#####  required for GUI #####
 (deftemplate init-agent (slot done (allowed-values yes no))) ; Ci dice se l'inizializzazione dell'agente è conclusa
 
@@ -18,14 +20,14 @@
 
 (deftemplate K-agent
 	(slot step)
-        (slot time) 
+    (slot time) 
 	(slot pos-r) 
 	(slot pos-c) 
 	(slot direction) 
 	(slot l-drink)
-        (slot l-food)
-        (slot l_d_waste) ;COS'E' ?
-        (slot l_f_waste)
+    (slot l-food)
+    (slot l_d_waste) ;COS'E' ?
+    (slot l_f_waste)
 )
 
 ;### Action Execution History Template ###
@@ -254,11 +256,21 @@
 ;### TODO !!!! Empty Plan ###
 ; !!!!!!!!!!!!!!!!!!!!!!!!!!!
 ;CHECK IF WORKS
-;Planning required -> clean old plan actions
+;Planning required -> clear old plan actions
 (defrule BDI_loop_4_planning_clear_old_plan_actions
     (declare (salience 81))
     ?bdis <- (BDistatus BDI-4)    
     ?pa <- (plan-action)  
+    ?f <- (intentions_changed (changed yes))     
+    =>
+        (retract ?pa)        
+)
+
+;Planning required -> clear old basic actions
+(defrule BDI_loop_4_planning_clear_old_basic_actions
+    (declare (salience 81))
+    ?bdis <- (BDistatus BDI-4)    
+    ?pa <- (basic-action)  
     ?f <- (intentions_changed (changed yes))     
     =>
         (retract ?pa)        
@@ -293,8 +305,28 @@
         (assert (BDistatus BDI-5))
 )
 
+;Head plan action useless (goto same position)
+(defrule BDI_loop_5_plan_head_useless
+    (declare (salience 76))
+    ?bdis <- (BDistatus BDI-5)
+    ?paseq-f <- (plan-actions-seq ?paseq)
+    ?pa-f <- (plan-action (seq ?paseq)
+            (action Goto)
+            (param1 ?p1)
+            (param2 ?p2)
+            (param3 ?p3))
+    (status (step ?s)) 
+    (K-agent (step ?s) (pos-r ?p1) (pos-c ?p2))
+    =>
+        ;(retract ?bdis)
+        (retract ?pa-f)
+        (retract ?paseq-f) ;Advance Plan Action Sequence Counter
+        (assert (plan-actions-seq (+ 1 ?paseq)))
+        ;(assert (BDistatus BDI-EXEC-check-plan))
+)
+
 ; !!!!!!!!!!!!!!!!!!!!!!!!!!!
-;### TODO !!!! Empty Basic Action ###
+;### DONE - CHECK !!!! Empty Basic Action ###
 ; !!!!!!!!!!!!!!!!!!!!!!!!!!!
 ;CHECK IF WORKS
 
