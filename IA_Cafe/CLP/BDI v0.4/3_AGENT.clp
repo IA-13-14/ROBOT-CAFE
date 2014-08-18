@@ -18,6 +18,11 @@
                      (slot initial (type SYMBOL) (allowed-symbols no yes) (default no)) ;campo per distinguere i dati iniziali dalle future percezioni temporanee
 )
 
+(deftemplate K-table 
+	(slot table)
+	(slot state (allowed-values (Clean Eating Dirty)))
+)
+
 (deftemplate K-agent
 	(slot step)
     (slot time) 
@@ -188,8 +193,19 @@
         (assert (access-cell (object ?obj) (obj-r ?r) (obj-c ?c) (pos-r ?r) (pos-c ?c2)))            
 )
 ;----
- 
+
 (defrule  beginagent2
+    (declare (salience 13))
+    (status (step 0))
+    ;(not (exec (step 0)))
+    ;#GUI#
+    (not (init-agent (done yes))) 
+    (Table (table-id ?t)) 
+=>
+    (assert (K-table (table ?t) (state Clean))) ;K-Table iniziali  
+)
+ 
+(defrule  beginagent3
     (declare (salience 11))
     (status (step 0))
     ;(not (exec (step 0)))
