@@ -22,7 +22,6 @@
 	(slot table)
 	(slot state (allowed-values Clean Eating Dirty))
 )
-
 (deftemplate K-agent
 	(slot step)
     (slot time) 
