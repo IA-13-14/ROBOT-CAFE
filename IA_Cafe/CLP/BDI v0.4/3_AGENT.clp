@@ -435,13 +435,73 @@
         (assert (BDistatus BDI-EXEC-check-plan))
 )
 
-;####################### IMPORTANTE: Implementare il controllo sul forward in caso di persona !!! ed eventuale replan percorso ###################
-;####################### IMPORTANTE: Implementare il controllo sul forward in caso di persona !!! ed eventuale replan percorso ###################
-;####################### IMPORTANTE: Implementare il controllo sul forward in caso di persona !!! ed eventuale replan percorso ###################
 
-;Exec head basic action if possible
-(defrule BDI_loop_6_possible_A_head
+;###Check if head action is impossible###
+
+(defrule BDI_loop_6_impossible_Forward_north
     (declare (salience 70))
+    ?bdis <- (BDistatus BDI-6)
+    (basic-actions-seq ?baseq)
+    (basic-action (seq ?baseq) (action Forward))
+    (K-agent (pos-r ?r) (pos-c ?c) (direction north))
+    (K-cell (pos-r =(+ ?r 1)) (pos-c ?c) (contains ~Empty&~Parking))
+    ?arc <- (action-retry-counter ?count)
+    => 
+    	(retract ?arc)
+  		(assert (action-retry-counter (+ ?count 1)))
+    	(retract ?bdis)
+    	(assert (BDistatus BDI-5)) 
+)
+
+(defrule BDI_loop_6_impossible_Forward_south
+    (declare (salience 70))
+    ?bdis <- (BDistatus BDI-6)
+    (basic-actions-seq ?baseq)
+    (basic-action (seq ?baseq) (action Forward))
+    (K-agent (pos-r ?r) (pos-c ?c) (direction south))
+    (K-cell (pos-r =(- ?r 1)) (pos-c ?c) (contains ~Empty&~Parking))
+    ?arc <- (action-retry-counter ?count)
+    => 
+    	(retract ?arc)
+  		(assert (action-retry-counter (+ ?count 1)))
+    	(retract ?bdis)
+    	(assert (BDistatus BDI-5)) 
+)
+
+(defrule BDI_loop_6_impossible_Forward_east
+    (declare (salience 70))
+    ?bdis <- (BDistatus BDI-6)
+    (basic-actions-seq ?baseq)
+    (basic-action (seq ?baseq) (action Forward))
+    (K-agent (pos-r ?r) (pos-c ?c) (direction east))
+    (K-cell (pos-r ?r) (pos-c =(+ ?c 1)) (contains ~Empty&~Parking))
+    ?arc <- (action-retry-counter ?count)
+    => 
+    	(retract ?arc)
+  		(assert (action-retry-counter (+ ?count 1)))
+    	(retract ?bdis)
+    	(assert (BDistatus BDI-5)) 
+)
+
+(defrule BDI_loop_6_impossible_Forward_west
+    (declare (salience 70))
+    ?bdis <- (BDistatus BDI-6)
+    (basic-actions-seq ?baseq)
+    (basic-action (seq ?baseq) (action Forward))
+    (K-agent (pos-r ?r) (pos-c ?c) (direction west))
+    (K-cell (pos-r ?r) (pos-c =(- ?c 1)) (contains ~Empty&~Parking))
+    ?arc <- (action-retry-counter ?count)
+    => 
+    	(retract ?arc)
+  		(assert (action-retry-counter (+ ?count 1)))
+    	(retract ?bdis)
+    	(assert (BDistatus BDI-5)) 
+)
+
+
+;Exec head basic action
+(defrule BDI_loop_6_A_head
+    (declare (salience 65))
     ?bdis <- (BDistatus BDI-6)
     ?baseq-f <- (basic-actions-seq ?baseq)
     ?ba-f <- (basic-action
@@ -460,28 +520,6 @@
         (assert (BDistatus BDI-EXEC-check-plan))
 )
 
-;Exec head basic action if possible (goto check)
-;(defrule BDI_loop_6_possible_A_head_goto
-;    (declare (salience 70))
-;    ?bdis <- (BDistatus BDI-6)
-;    ?baseq-f <- (basic-actions-seq ?baseq)
-;    ?ba-f <- (basic-action
-;                (seq ?baseq)
-;                (action Forward)
-;                (param1 ?p1)
-;                (param2 ?p2)
-;                (param3 ?p3))
-;    (status (step ?s)) 
-;    (K-agent (step ?s) (pos-r ?r) (pos-c ?c))
-;    ;(K-cell (pos-r ?r 
-;    =>
-;        (retract ?bdis)
-;        (retract ?ba-f)
-;        (assert (exec (step ?s) (action ?action) (param1 ?p1) (param2 ?p2) (param3 ?p3)))
-;        (retract ?baseq-f) ;Advance Basic Action Sequence Counter
-;        (assert (basic-actions-seq (+ 1 ?baseq)))
-;        (assert (BDistatus BDI-EXEC-check-plan))
-;)
 
 ;Check Empty basic actions -> Remove plan -> next rule
 (defrule BDI-EXEC-check-plan-empty
