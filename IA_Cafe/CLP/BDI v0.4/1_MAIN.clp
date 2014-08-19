@@ -140,19 +140,19 @@
 (defrule go-on-env	
 	(declare (salience 21))
 ?f1<-	(status (step ?t))
-	(exec (step ?t)) 	;// azione da eseguire al al passo T, viene simulata dall'environment
+	(exec (step ?t)) 	;// azione da eseguire al passo T, viene simulata dall'environment
 =>
 ;	(printout t crlf)
 	(focus ENV)
 )
 
-;// quando finisce il tempo l'esecuzione si interrompe e vengono stampate le penalit�
+;// quando finisce il tempo l'esecuzione si interrompe e vengono stampate le penalita'
 (defrule game-over	
 	(declare (salience 10))
 	(maxduration ?d)
 	(status (step ?d))
 	(penalty ?p)
 => 
-	(printout t crlf " TIME OVER - Penalit� accumulate: " ?p crlf crlf)
+	(printout t crlf " TIME OVER - Penalita' accumulate: " ?p crlf crlf)
 	(halt)
 )

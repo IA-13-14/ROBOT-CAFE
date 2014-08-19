@@ -5,9 +5,9 @@
 (defglobal ?*SLOTS* = 4)
 
 ;#####  required for GUI #####
-(deftemplate init-agent (slot done (allowed-values yes no))) ; Ci dice se l'inizializzazione dell'agente è conclusa
+(deftemplate init-agent (slot done (allowed-values yes no))) ; Ci dice se l'inizializzazione dell'agente e' conclusa
 
-; Mantiene lo step in cui è stata effettuata l'ultima percezione (onde evitare loop su una stessa percezione)
+; Mantiene lo step in cui e' stata effettuata l'ultima percezione (onde evitare loop su una stessa percezione)
 (deftemplate last-perc (slot step))
 
 ;END -- #####  required for GUI #####
@@ -18,6 +18,11 @@
                      (slot initial (type SYMBOL) (allowed-symbols no yes) (default no)) ;campo per distinguere i dati iniziali dalle future percezioni temporanee
 )
 
+(deftemplate K-table 
+	(slot step)
+	(slot table)
+	(slot state (allowed-values Clean Eating Dirty))
+)
 (deftemplate K-agent
 	(slot step)
     (slot time) 
@@ -188,8 +193,19 @@
         (assert (access-cell (object ?obj) (obj-r ?r) (obj-c ?c) (pos-r ?r) (pos-c ?c2)))            
 )
 ;----
- 
+
 (defrule  beginagent2
+    (declare (salience 13))
+    (status (step 0))
+    ;(not (exec (step 0)))
+    ;#GUI#
+    (not (init-agent (done yes))) 
+    (Table (table-id ?t)) 
+=>
+    (assert (K-table (step 0) (table ?t) (state Clean))) ;K-Table iniziali  
+)
+ 
+(defrule  beginagent3
     (declare (salience 11))
     (status (step 0))
     ;(not (exec (step 0)))
