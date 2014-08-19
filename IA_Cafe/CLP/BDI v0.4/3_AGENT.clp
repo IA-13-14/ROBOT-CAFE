@@ -22,6 +22,8 @@
 	(slot step)
 	(slot table)
 	(slot state (allowed-values Clean Eating Dirty))
+	(slot food)
+	(slot drink)
 )
 (deftemplate K-agent
 	(slot step)
@@ -202,7 +204,7 @@
     (not (init-agent (done yes))) 
     (Table (table-id ?t)) 
 =>
-    (assert (K-table (step 0) (table ?t) (state Clean))) ;K-Table iniziali  
+    (assert (K-table (step 0) (table ?t) (state Clean) (food 0) (drink 0))) ;K-Table iniziali  
 )
  
 (defrule  beginagent3

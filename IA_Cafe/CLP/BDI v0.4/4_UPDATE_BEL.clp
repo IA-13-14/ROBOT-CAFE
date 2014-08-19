@@ -348,11 +348,11 @@
     (exec-history (step =(- ?s 1)) (action DeliveryFood) (param1 ?p1) (param2 ?p2) (param3 ?p3))
     (Table (table-id ?tid) (pos-r ?p1) (pos-c ?p2))
     ?ka <- (K-agent (step ?s) (time ?t) (l-food ?l-food))   
-    ?kt <- (K-table (table ?tid))
+    ?kt <- (K-table (table ?tid) (food ?tf))
     =>
         (assert (printGUI (time ?t) (step ?s) (source "AGENT::UPDATE-BEL") (verbosity 2) (text  "Perceived Load (%p1) with DeliveryFood at table (%p2), current Food (%p3)") (param1 ?load) (param2 ?tid) (param3 (- ?l-food 1))))
         (modify ?ka (l-food (- ?l-food 1)))    
-        (modify ?kt (step ?s) (state Eating))
+        (modify ?kt (step ?s) (state Eating) (food (+ ?tf 1))
         (retract ?p)
 )
 
@@ -367,11 +367,11 @@
     (exec-history (step =(- ?s 1)) (action DeliveryDrink) (param1 ?p1) (param2 ?p2) (param3 ?p3))
     (Table (table-id ?tid) (pos-r ?p1) (pos-c ?p2))
     ?ka <- (K-agent (step ?s) (time ?t) (l-drink ?l-drink))   
-    ?kt <- (K-table (table ?tid))
+    ?kt <- (K-table (table ?tid) (drink ?td))
     =>
         (assert (printGUI (time ?t) (step ?s) (source "AGENT::UPDATE-BEL") (verbosity 2) (text  "Perceived Load (%p1) with DeliveryDrink at table (%p2), current Drink (%p3)") (param1 ?load) (param2 ?tid) (param3 (- ?l-drink 1))))
         (modify ?ka (l-drink (- ?l-drink 1))) 
-        (modify ?kt (step ?s) (state Eating))   
+        (modify ?kt (step ?s) (state Eating) (drink ?td +1))   
         (retract ?p)
 )
 
@@ -386,7 +386,7 @@
     =>
         (assert (printGUI (time ?t) (step ?s) (source "AGENT::UPDATE-BEL") (verbosity 2) (text  "After CleanTable on table (%p1) loaded Waste Food and Drink") (param1 ?tid)))
         (modify ?ka (l_f_waste yes) (l_d_waste yes))
-        (modify ?kt (step ?s) (state Clean))    
+        (modify ?kt (step ?s) (state Clean) (food 0) (drink 0))    
         (retract ?f)
 )
 
