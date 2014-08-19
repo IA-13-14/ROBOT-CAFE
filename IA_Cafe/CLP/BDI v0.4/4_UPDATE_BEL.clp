@@ -254,13 +254,15 @@
               (sender ?snd)
               (type finish)
            )
+    ?k <- (K-table (table ?snd))
     =>
 
     (assert (dummy))
     (assert (printGUI (time ?t) (step ?s) (source "AGENT::UPDATE-BEL") (verbosity 2) (text  "Perceived Finish on table (%p1)") (param1 ?snd)))
     ;do something
     (assert (desire (step ?s) (time ?t) (table ?snd) (type clean)))
-
+	(modify ?k (step ?s) (state Dirty))
+	
     (retract ?p)
 )
 
@@ -300,23 +302,6 @@
 ;
 ;    (retract ?p)
 ;) 
-
-;Percezione tavolo da pulire (dopo CheckFinish)
-(defrule percp-finish
-    (status (step ?s))
-    ?p <- (perc-finish
-            (step ?s)
-            (time ?t)		
-	        (finish ?finish)
-          )		
-    ?ka <- (K-agent (step ?s) (time ?t) (pos-r ?r) (pos-c ?c))
-    =>
-
-    (assert (printGUI (time ?t) (step ?s) (source "AGENT::UPDATE-BEL") (verbosity 2) (text  "Perceived table next to (%p1,%p2), dirty (%p3)") (param1 ?r) (param2 ?c) (param3 ?finish)))
-    ;do something
-
-    (retract ?p)
-)
 
 ;### Aggiornamento Belief in base alle azioni precedenti ###
 
@@ -361,10 +346,13 @@
 	        (load ?load)
           )		
     (exec-history (step =(- ?s 1)) (action DeliveryFood) (param1 ?p1) (param2 ?p2) (param3 ?p3))
+    (Table (table-id ?tid) (pos-r ?p1) (pos-c ?p2))
     ?ka <- (K-agent (step ?s) (time ?t) (l-food ?l-food))   
+    ?kt <- (K-table (table ?tid))
     =>
-        (assert (printGUI (time ?t) (step ?s) (source "AGENT::UPDATE-BEL") (verbosity 2) (text  "Perceived Load (%p1) with DeliveryFood, current Food (%p2)") (param1 ?load) (param2 (- ?l-food 1))))
+        (assert (printGUI (time ?t) (step ?s) (source "AGENT::UPDATE-BEL") (verbosity 2) (text  "Perceived Load (%p1) with DeliveryFood at table (%p2), current Food (%p3)") (param1 ?load) (param2 ?tid) (param3 (- ?l-food 1))))
         (modify ?ka (l-food (- ?l-food 1)))    
+        (modify ?kt (step ?s) (state Eating))
         (retract ?p)
 )
 
@@ -377,10 +365,13 @@
 	        (load ?load)
           )		
     (exec-history (step =(- ?s 1)) (action DeliveryDrink) (param1 ?p1) (param2 ?p2) (param3 ?p3))
+    (Table (table-id ?tid) (pos-r ?p1) (pos-c ?p2))
     ?ka <- (K-agent (step ?s) (time ?t) (l-drink ?l-drink))   
+    ?kt <- (K-table (table ?tid))
     =>
-        (assert (printGUI (time ?t) (step ?s) (source "AGENT::UPDATE-BEL") (verbosity 2) (text  "Perceived Load (%p1) with DeliveryDrink, current Drink (%p2)") (param1 ?load) (param2 (- ?l-drink 1))))
-        (modify ?ka (l-drink (- ?l-drink 1)))    
+        (assert (printGUI (time ?t) (step ?s) (source "AGENT::UPDATE-BEL") (verbosity 2) (text  "Perceived Load (%p1) with DeliveryDrink at table (%p2), current Drink (%p3)") (param1 ?load) (param2 ?tid) (param3 (- ?l-drink 1))))
+        (modify ?ka (l-drink (- ?l-drink 1))) 
+        (modify ?kt (step ?s) (state Eating))   
         (retract ?p)
 )
 
@@ -388,11 +379,14 @@
 (defrule update-lastaction-CleanTable 
     (status (step ?s))	
     (exec-history (step =(- ?s 1)) (action CleanTable) (param1 ?p1) (param2 ?p2) (param3 ?p3))
+    (Table (table-id ?tid) (pos-r ?p1) (pos-c ?p2))
     ?ka <- (K-agent (step ?s) (time ?t) (l_f_waste ?lw-food) (l_d_waste ?lw-drink))   
+    ?kt <- (K-table (table ?tid))
     ?f <- (UPDATE-BEL__exec-history-runonce)
     =>
-        (assert (printGUI (time ?t) (step ?s) (source "AGENT::UPDATE-BEL") (verbosity 2) (text  "After CleanTable loaded Waste Food and Drink")))
-        (modify ?ka (l_f_waste yes) (l_d_waste yes))    
+        (assert (printGUI (time ?t) (step ?s) (source "AGENT::UPDATE-BEL") (verbosity 2) (text  "After CleanTable on table (%p1) loaded Waste Food and Drink") (param1 ?tid)))
+        (modify ?ka (l_f_waste yes) (l_d_waste yes))
+        (modify ?kt (step ?s) (state Clean))    
         (retract ?f)
 )
 
@@ -420,7 +414,44 @@
         (retract ?f)
 )
 
-;### TODO: CheckFinish ?? ###
+;Percezione tavolo da pulire (dopo CheckFinish)
+(defrule update-lastaction-CheckFinish-Dirty
+    (status (step ?s))
+    ?p <- (perc-finish
+            (step ?s)
+            (time ?t)		
+	        (finish yes)
+          )		
+    (exec-history (step =(- ?s 1)) (action CheckFinish) (param1 ?p1) (param2 ?p2) (param3 ?p3))
+    (Table (table-id ?tid) (pos-r ?p1) (pos-c ?p2))
+    ?ka <- (K-agent (step ?s) (time ?t) (pos-r ?r) (pos-c ?c))
+    ?kt <- (K-table (table ?tid))
+    =>
+
+    (assert (printGUI (time ?t) (step ?s) (source "AGENT::UPDATE-BEL") (verbosity 2) (text  "Perceived table (%p1) dirty") (param1 ?tid)))
+    (modify ?kt (step ?s) (state Dirty))
+
+    (retract ?p)
+)
+
+(defrule update-lastaction-CheckFinish-Eating
+    (status (step ?s))
+    ?p <- (perc-finish
+            (step ?s)
+            (time ?t)		
+	        (finish no)
+          )		
+    (exec-history (step =(- ?s 1)) (action CheckFinish) (param1 ?p1) (param2 ?p2) (param3 ?p3))
+    (Table (table-id ?tid) (pos-r ?p1) (pos-c ?p2))
+    ?ka <- (K-agent (step ?s) (time ?t) (pos-r ?r) (pos-c ?c))
+    ?kt <- (K-table (table ?tid))
+    =>
+
+    (assert (printGUI (time ?t) (step ?s) (source "AGENT::UPDATE-BEL") (verbosity 2) (text  "Perceived table (%p1) eating") (param1 ?tid)))
+    (modify ?kt (step ?s) (state Eating))
+
+    (retract ?p)
+)
 
 (defrule dispose
     (declare (salience -100))
