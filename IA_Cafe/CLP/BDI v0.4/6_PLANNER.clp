@@ -54,7 +54,7 @@
 
 ;Start conditional plan for serve order
 (defrule serve-order-start
-    ?f <- (PLANNER__runonce)
+    (PLANNER__runonce)
     (not (planning))
 	(intention  (table ?tab)
                 (type order)
@@ -267,23 +267,118 @@
 
 ;#### Clean table plan ####
 
-;Static test to satisfy first clean request
-(defrule static-clean-T4
-    ?f <- (PLANNER__runonce)
-    (intention  (table ?tab)
+(defrule clean-table
+    (PLANNER__runonce)
+    (not (planning))
+	(intention  (table ?tab)
                 (type clean)
-                
     )
+    (K-table (table ?tab) (state Dirty))
     (status (step ?s) (time ?t))
+    (K-agent (step ?s) (pos-r ?ag-r) (pos-c ?ag-c))
     =>
-        (assert (printGUI (time ?t) (step ?s) (source "AGENT::PLANNER") (verbosity 2) (text  "Planning for intention (Type:%p1,T:%p2)") (param1 order) (param2 ?tab)))
-        (assert (plan-action (seq 0) (action Goto) (param1 6) (param2 6)))
-        (assert (plan-action (seq 1) (action CleanTable) (param1 5) (param2 6)))
-        (assert (plan-action (seq 2) (action Goto) (param1 8) (param2 6)))
-        (assert (plan-action (seq 3) (action EmptyFood) (param1 8) (param2 5)))
-        (assert (plan-action (seq 4) (action EmptyDrink) (param1 8) (param2 7)))   
-        (retract ?f)
+        (assert (printGUI (time ?t) (step ?s) (source "AGENT::PLANNER") (verbosity 2) (text  "Planning for intention (Type:%p1,T:%p2)") (param1 clean) (param2 ?tab)))
+        (assert (planning (type cleantable) (step clean) (pseq 0) (param1 ?tab)))
+        (assert (var agentPos ?ag-r ?ag-c))
 )
+
+(defrule clean-table-clean
+	?pln <- (planning (type cleantable) (step clean) (pseq 0) (param1 ?tab))
+    (Table (table-id ?tab) (pos-r ?tabr) (pos-c ?tabc))
+    ;Table Best position
+    ?vpos <- (var agentPos ?ag-r ?ag-c)
+    (access-cell (object Table) (obj-r ?tabr) (obj-c ?tabc) (pos-r ?r-tab) (pos-c ?c-tab))
+    (not (access-cell (object Table) (obj-r ?tabr) (obj-c ?tabc) (pos-r ?r1) (pos-c ?c1&:(> (manh-cost ?ag-r ?ag-c ?r-tab ?c-tab) (manh-cost ?ag-r ?ag-c ?r1 ?c1)))))
+    =>
+    	(assert (plan-action (seq 0) (action Goto) (param1 ?r-tab) (param2 ?c-tab)))
+    	(retract ?vpos)
+    	(assert (var agentPos ?r-tab ?c-tab))
+        (assert (plan-action (seq 1) (action CleanTable) (param1 ?tabr) (param2 ?tabc)))
+        (modify ?pln (step objectives) (pseq 2))
+)
+
+(defrule clean-table-objectives-food
+	(declare (salience 50))
+	(planning (type cleantable) (step objectives) (param1 ?tab))
+   	(K-table (table ?tab) (food ?ft))
+   	(test (> ?ft 0))
+   	;TB Best position
+    (var agentPos ?ag-r ?ag-c)
+    (access-cell (object TB) (obj-r ?tb-r) (obj-c ?tb-c) (pos-r ?r) (pos-c ?c))
+    (not (access-cell (object TB) (pos-r ?r1) (pos-c ?c1&:(> (manh-cost ?ag-r ?ag-c ?r ?c) (manh-cost ?ag-r ?ag-c ?r1 ?c1)))))
+   	=>
+   		(assert (var to-unload food))
+   		(assert (var destination food ?r ?c ?tb-r ?tb-c))
+   		(assert (var distance food (manh-cost ?ag-r ?ag-c ?r ?c)))
+)
+
+(defrule clean-table-objectives-drink
+	(declare (salience 50))
+	(planning (type cleantable) (step objectives) (param1 ?tab))
+   	(K-table (table ?tab) (drink ?dt))
+   	(test (> ?dt 0))
+   	;RB Best position
+    (var agentPos ?ag-r ?ag-c)
+    (access-cell (object RB) (obj-r ?rb-r) (obj-c ?rb-c) (pos-r ?r) (pos-c ?c))
+    (not (access-cell (object RB) (pos-r ?r1) (pos-c ?c1&:(> (manh-cost ?ag-r ?ag-c ?r ?c) (manh-cost ?ag-r ?ag-c ?r1 ?c1)))))
+   	=>
+   		(assert (var to-unload drink))
+   		(assert (var destination drink ?r ?c ?rb-r ?rb-c))
+   		(assert (var distance drink (manh-cost ?ag-r ?ag-c ?r ?c)))
+)
+
+(defrule clean-table-objectives-done
+	(declare (salience 49))
+	?pln <- (planning (type cleantable) (step objectives) (param1 ?tab))
+	=>
+		(modify ?pln (step unload))
+)
+
+(defrule clean-table-unload-food
+	(declare (salience 30))
+	?pln <- (planning (type cleantable) (step unload) (pseq ?seq) (param1 ?tab))
+	?vtu <- (var to-unload food)
+	?vdest <- (var destination food ?r ?c ?tb-r ?tb-c)
+	?vdist <- (var distance food ?dist-f)
+	(or (not (var to-unload drink)) (var distance drink ?dist-d&:(> ?dist-d ?dist-f))) ;no drink to unload or RB is farther than TB
+	?vpos <- (var agentPos ?ag-r ?ag-c)
+	=>
+		(assert (plan-action (seq ?seq) (action Goto) (param1 ?r) (param2 ?c)))
+		(retract ?vpos)
+		(assert (var agentPos ?r ?c))
+		(assert (plan-action (seq (+ ?seq 1)) (action EmptyFood) (param1 ?tb-r) (param2 ?tb-c)))
+		(retract ?vtu)
+		(retract ?vdest)
+		(retract ?vdist)
+		(modify ?pln (pseq (+ ?seq 2)))
+)
+
+(defrule clean-table-unload-drink
+	(declare (salience 29))
+	?pln <- (planning (type cleantable) (step unload) (pseq ?seq) (param1 ?tab))
+	?vtu <- (var to-unload drink)
+	?vdest <- (var destination drink ?r ?c ?rb-r ?rb-c)
+	?vdist <- (var distance drink ?dist-d)
+	?vpos <- (var agentPos ?ag-r ?ag-c)
+	=>
+		(assert (plan-action (seq ?seq) (action Goto) (param1 ?r) (param2 ?c)))
+		(retract ?vpos)
+		(assert (var agentPos ?r ?c))
+		(assert (plan-action (seq (+ ?seq 1)) (action EmptyDrink) (param1 ?rb-r) (param2 ?rb-c)))
+		(retract ?vtu)
+		(retract ?vdest)
+		(retract ?vdist)
+		(modify ?pln (pseq (+ ?seq 2)))
+)
+
+(defrule clean-table-unload-done
+	?pln <- (planning (type cleantable) (step unload))
+	?f <- (PLANNER__runonce)
+	=>
+		;plan completed
+		(retract ?pln)
+		(retract ?f)
+)	
 
 ;#### END - Clean table plan ####
 

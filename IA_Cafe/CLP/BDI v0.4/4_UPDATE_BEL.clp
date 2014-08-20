@@ -314,11 +314,13 @@
 	        (load ?load)
           )		
     (exec-history (step =(- ?s 1)) (action LoadFood) (param1 ?p1) (param2 ?p2) (param3 ?p3))
-    ?ka <- (K-agent (step ?s) (time ?t) (l-food ?l-food))   
+    ?ka <- (K-agent (step ?s) (time ?t) (l-food ?l-food))  
+    ?f <- (UPDATE-BEL__exec-history-runonce) 
     =>
         (assert (printGUI (time ?t) (step ?s) (source "AGENT::UPDATE-BEL") (verbosity 2) (text  "Perceived Load (%p1) with LoadFood, current Food (%p2)") (param1 ?load) (param2 (+ 1 ?l-food))))
         (modify ?ka (l-food (+ 1 ?l-food)))    
         (retract ?p)
+        (retract ?f)
 )
 
 ;Aggiorna stato carico food con percezione Load e azione precedente LoadDrink
@@ -331,10 +333,12 @@
           )		
     (exec-history (step =(- ?s 1)) (action LoadDrink) (param1 ?p1) (param2 ?p2) (param3 ?p3))
     ?ka <- (K-agent (step ?s) (time ?t) (l-drink ?l-drink))   
+    ?f <- (UPDATE-BEL__exec-history-runonce)
     =>
         (assert (printGUI (time ?t) (step ?s) (source "AGENT::UPDATE-BEL") (verbosity 2) (text  "Perceived Load (%p1) with LoadDrink, current Drink (%p2)") (param1 ?load) (param2 (+ 1 ?l-drink))))
         (modify ?ka (l-drink (+ 1 ?l-drink)))    
         (retract ?p)
+        (retract ?f)
 )
 
 ;Aggiorna stato carico food con percezione Load e azione precedente DeliveryFood
@@ -349,11 +353,13 @@
     (Table (table-id ?tid) (pos-r ?p1) (pos-c ?p2))
     ?ka <- (K-agent (step ?s) (time ?t) (l-food ?l-food))   
     ?kt <- (K-table (table ?tid) (food ?tf))
+    ?f <- (UPDATE-BEL__exec-history-runonce)
     =>
         (assert (printGUI (time ?t) (step ?s) (source "AGENT::UPDATE-BEL") (verbosity 2) (text  "Perceived Load (%p1) with DeliveryFood at table (%p2), current Food (%p3)") (param1 ?load) (param2 ?tid) (param3 (- ?l-food 1))))
         (modify ?ka (l-food (- ?l-food 1)))    
-        (modify ?kt (step ?s) (state Eating) (food (+ ?tf 1))
+        (modify ?kt (step ?s) (state Eating) (food (+ ?tf 1)))
         (retract ?p)
+        (retract ?f)
 )
 
 ;Aggiorna stato carico food con percezione Load e azione precedente DeliveryDrink
@@ -368,11 +374,13 @@
     (Table (table-id ?tid) (pos-r ?p1) (pos-c ?p2))
     ?ka <- (K-agent (step ?s) (time ?t) (l-drink ?l-drink))   
     ?kt <- (K-table (table ?tid) (drink ?td))
+    ?f <- (UPDATE-BEL__exec-history-runonce)
     =>
         (assert (printGUI (time ?t) (step ?s) (source "AGENT::UPDATE-BEL") (verbosity 2) (text  "Perceived Load (%p1) with DeliveryDrink at table (%p2), current Drink (%p3)") (param1 ?load) (param2 ?tid) (param3 (- ?l-drink 1))))
         (modify ?ka (l-drink (- ?l-drink 1))) 
-        (modify ?kt (step ?s) (state Eating) (drink ?td +1))   
+        (modify ?kt (step ?s) (state Eating) (drink (+ ?td 1)))   
         (retract ?p)
+        (retract ?f)
 )
 
 ;Aggiorna stato azione precedente CleanTable
@@ -426,12 +434,13 @@
     (Table (table-id ?tid) (pos-r ?p1) (pos-c ?p2))
     ?ka <- (K-agent (step ?s) (time ?t) (pos-r ?r) (pos-c ?c))
     ?kt <- (K-table (table ?tid))
+    ?f <- (UPDATE-BEL__exec-history-runonce)
     =>
 
     (assert (printGUI (time ?t) (step ?s) (source "AGENT::UPDATE-BEL") (verbosity 2) (text  "Perceived table (%p1) dirty") (param1 ?tid)))
     (modify ?kt (step ?s) (state Dirty))
-
     (retract ?p)
+    (retract ?f)
 )
 
 (defrule update-lastaction-CheckFinish-Eating
@@ -445,12 +454,20 @@
     (Table (table-id ?tid) (pos-r ?p1) (pos-c ?p2))
     ?ka <- (K-agent (step ?s) (time ?t) (pos-r ?r) (pos-c ?c))
     ?kt <- (K-table (table ?tid))
+    ?f <- (UPDATE-BEL__exec-history-runonce)
     =>
 
     (assert (printGUI (time ?t) (step ?s) (source "AGENT::UPDATE-BEL") (verbosity 2) (text  "Perceived table (%p1) eating") (param1 ?tid)))
     (modify ?kt (step ?s) (state Eating))
-
     (retract ?p)
+    (retract ?f)
+)
+
+(defrule dispose_1
+	(declare (salience -99))
+	?f <- (UPDATE-BEL__exec-history-runonce)
+	=>
+		(retract ?f)
 )
 
 (defrule dispose
