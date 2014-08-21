@@ -263,8 +263,25 @@
 )
 
 
-;### TODO: answer to new orders immediately and goto 0 !!!!
-(defrule BDI_loop_2_check_answer_order
+;#### TODO: controllare che funzioni la scelta e che le K-table funzionino anche come step e ordine ####
+;answer to new orders immediately and goto 0 !!!!
+;delay order
+(defrule BDI_loop_2_check_answer_order_delay
+    (declare (salience 91))
+    ?bdis <- (BDistatus BDI-2)
+    ?ansor <- (answer-to-order (step ?os) (time ?ot) (order ?req-id))
+    (order (step ?os) (time ?ot) (req-id ?req-id) (table ?otable) (food ?ofood) (drink ?odrink))
+    (status (step ?s))       
+    (K-table (table ?otable) (state ~Clean)) 
+    =>
+        (retract ?bdis)
+        (retract ?ansor)
+        (assert (exec (step ?s) (action Inform) (param1 ?otable) (param2 ?req-id) (param3 delayed)))  
+        (assert (BDistatus BDI-EXEC-ACTION)) ;Execute action and reset
+)
+
+;accept order
+(defrule BDI_loop_2_check_answer_order_accept
     (declare (salience 90))
     ?bdis <- (BDistatus BDI-2)
     ?ansor <- (answer-to-order (step ?os) (time ?ot) (order ?req-id))
@@ -273,7 +290,7 @@
     =>
         (retract ?bdis)
         (retract ?ansor)
-        ;### TODO: Decidere se accettare o meno
+        ;### TODO: Decidere se accettare o meno l'ordine
         (assert (exec (step ?s) (action Inform) (param1 ?otable) (param2 ?req-id) (param3 accepted)))  
         (assert (BDistatus BDI-EXEC-ACTION)) ;Execute action and reset
 )
@@ -304,16 +321,11 @@
     (status (step ?s) (time ?t))        
     =>
         (retract ?bdis)
-        ;### TODO: Deliberate 
         (assert (printGUI (time ?t) (step ?s) (source "AGENT") (verbosity 2) (text  "BDI - Deliberating !")))
         (focus DELIBERATE)
         (assert (BDistatus BDI-4))
 )
 
-; !!!!!!!!!!!!!!!!!!!!!!!!!!!
-;### TODO !!!! Empty Plan ###
-; !!!!!!!!!!!!!!!!!!!!!!!!!!!
-;CHECK IF WORKS
 ;Planning required -> clear old plan actions
 (defrule BDI_loop_4_planning_clear_old_plan_actions
     (declare (salience 81))
@@ -343,8 +355,7 @@
     ?f <- (intentions_changed (changed yes))     
     =>
         (retract ?bdis)
-        (modify ?f (changed no))
-        ;### TODO: Plan if needed 
+        (modify ?f (changed no)) 
         (retract ?paseq)
         (assert (plan-actions-seq 0))
         (assert (printGUI (time ?t) (step ?s) (source "AGENT") (verbosity 2) (text  "BDI - Planning !")))
@@ -391,9 +402,7 @@
 ;Actions-Planning
 (defrule BDI_loop_5
     (declare (salience 75))
-    ;### TODO: Check if needed to replan
     ?bdis <- (BDistatus BDI-5)
-    ;(not (basic-action));### TODO: Add or condition (actions_retry_counter ?art&:(> ?art 0)))    
     (or (not (basic-action)) (actions_retry_counter ?art&:(> ?art 0)))    
     (plan-actions-seq ?seq)
     ?baseq-f <- (basic-actions-seq ?ba-seq)

@@ -64,6 +64,7 @@
     (modify ?f (changed yes))
 )
 
+;#### TODO: Check if order can be served (not table dirty) !! ####
 ;FIFO Strategy
 (defrule fifo-deliberation
     (not (intention))
