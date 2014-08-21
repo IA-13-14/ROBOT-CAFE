@@ -59,6 +59,7 @@
 )
 
 (defrule stop-runonce
+	(declare (salience 90))
     ?f <- (UPDATE-BEL__runonce)
     =>
     (retract ?f)
