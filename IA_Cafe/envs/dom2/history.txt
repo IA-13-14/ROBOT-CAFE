@@ -38,11 +38,7 @@
 (move-path P1 3 C1  6 3)
 
 
-(move-path P2 1 C2  7 10)
-(move-path P2 2 C2  6 10)
-(move-path P2 3 C2  6 9)
-(move-path P2 4 C2  6 9)
-(move-path P2 5 C2  5 9)
+(move-path P2 1 C2  7 10)(move-path P2 2 C2  6 10)(move-path P2 3 C2  6 9)(move-path P2 4 C2  6 8)(move-path P2 5 C2  5 8)
 
 (move-path P3 1 C3  2 10)
 (move-path P3 2 C3  3 10)
