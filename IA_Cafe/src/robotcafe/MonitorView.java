@@ -331,7 +331,7 @@ public class MonitorView extends ClipsView implements Observer {
 
 			for (int i = map.length - 1; i >= 0; i--) {
 				for (int j = 0; j < map[0].length; j++) {
-					if (!mapString[i][j].equals(oldMapString[i][j])) {
+					if (!mapString[i][j].equals(oldMapString[i][j]) || (mapString[i][j].contains("agent_"))) {
 						list.add(new MapCell(i, j, mapString[i][j]));
 						oldMapString[i][j]=mapString[i][j];
 					}
