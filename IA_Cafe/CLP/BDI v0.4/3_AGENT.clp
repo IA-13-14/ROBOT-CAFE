@@ -137,6 +137,10 @@
         (slot param3)
 )
 
+(deftemplate ACTIONS-PLANNER-decode-action-result   
+        (slot result)
+)
+
 ;#### MODULE PATH_PLANNER Templates ####
 (deftemplate start-path-planning (slot source-direction (allowed-values north south east west)) (slot source-r) (slot source-c)
                                  (slot dest-direction (allowed-values north south east west any)) (slot dest-r) (slot dest-c))
@@ -224,7 +228,7 @@
 
     (assert (printGUI (time 0) (step 0) (source "AGENT") (verbosity 2) (text  "AGENT INITIALIZED !")))    
     (assert (AGENT__runonce))
-    (assert (forward_action_retry_counter 0))
+    (assert (actions_retry_counter 0))
     (assert (plan-actions-seq 0))
     (assert (basic-actions-seq 0))
     (assert (intentions_changed (changed no)))
@@ -437,6 +441,20 @@
         (assert (BDistatus BDI-EXEC-check-plan))
 )
 
+;Check if Actions Planner failed (path planning failed, probably because of a person blocking every path !)
+; WAIT once
+(defrule BDI_loop_6_actions_planner_failed
+    (declare (salience 71))
+    ?bdis <- (BDistatus BDI-6)
+    ?apr <- (ACTIONS-PLANNER-decode-action-result (result no))
+    (status (step ?s) (time ?t)) 
+    =>
+     	(assert (printGUI (time ?t) (step ?s) (source "AGENT") (verbosity 2) (text  "ACTIONS PLANNER FAILED, WAITING !")))
+        (retract ?bdis)
+        (assert (exec (step ?s) (action Wait)))        
+        (assert (BDistatus BDI-EXEC-ACTION))
+        (retract ?apr)
+)
 
 ;###Check if head action is impossible###
 
@@ -445,14 +463,15 @@
     ?bdis <- (BDistatus BDI-6)
     (basic-actions-seq ?baseq)
     (basic-action (seq ?baseq) (action Forward))
-    (K-agent (pos-r ?r) (pos-c ?c) (direction north))
+    (status (step ?s))
+    (K-agent (step ?s) (pos-r ?r) (pos-c ?c) (direction north))
     (K-cell (pos-r =(+ ?r 1)) (pos-c ?c) (contains ~Empty&~Parking))
-    ?arc <- (action-retry-counter ?count)
+    ?arc <- (actions_retry_counter ?count)
     => 
     	(retract ?arc)
   		(assert (action-retry-counter (+ ?count 1)))
     	(retract ?bdis)
-    	(assert (BDistatus BDI-5)) 
+    	(assert (BDistatus BDI-CHECK-FWD-REPLAN)) 
 )
 
 (defrule BDI_loop_6_impossible_Forward_south
@@ -460,14 +479,15 @@
     ?bdis <- (BDistatus BDI-6)
     (basic-actions-seq ?baseq)
     (basic-action (seq ?baseq) (action Forward))
-    (K-agent (pos-r ?r) (pos-c ?c) (direction south))
+    (status (step ?s))
+    (K-agent (step ?s) (pos-r ?r) (pos-c ?c) (direction south))
     (K-cell (pos-r =(- ?r 1)) (pos-c ?c) (contains ~Empty&~Parking))
-    ?arc <- (action-retry-counter ?count)
+    ?arc <- (actions_retry_counter ?count)
     => 
     	(retract ?arc)
   		(assert (action-retry-counter (+ ?count 1)))
     	(retract ?bdis)
-    	(assert (BDistatus BDI-5)) 
+    	(assert (BDistatus BDI-CHECK-FWD-REPLAN))  
 )
 
 (defrule BDI_loop_6_impossible_Forward_east
@@ -475,14 +495,15 @@
     ?bdis <- (BDistatus BDI-6)
     (basic-actions-seq ?baseq)
     (basic-action (seq ?baseq) (action Forward))
-    (K-agent (pos-r ?r) (pos-c ?c) (direction east))
+    (status (step ?s))
+    (K-agent (step ?s) (pos-r ?r) (pos-c ?c) (direction east))
     (K-cell (pos-r ?r) (pos-c =(+ ?c 1)) (contains ~Empty&~Parking))
-    ?arc <- (action-retry-counter ?count)
+    ?arc <- (actions_retry_counter ?count)
     => 
     	(retract ?arc)
-  		(assert (action-retry-counter (+ ?count 1)))
+  		(assert (actions_retry_counter (+ ?count 1)))
     	(retract ?bdis)
-    	(assert (BDistatus BDI-5)) 
+    	(assert (BDistatus BDI-CHECK-FWD-REPLAN)) 
 )
 
 (defrule BDI_loop_6_impossible_Forward_west
@@ -490,14 +511,15 @@
     ?bdis <- (BDistatus BDI-6)
     (basic-actions-seq ?baseq)
     (basic-action (seq ?baseq) (action Forward))
-    (K-agent (pos-r ?r) (pos-c ?c) (direction west))
+    (status (step ?s))
+    (K-agent (step ?s) (pos-r ?r) (pos-c ?c) (direction west))
     (K-cell (pos-r ?r) (pos-c =(- ?c 1)) (contains ~Empty&~Parking))
-    ?arc <- (action-retry-counter ?count)
+    ?arc <- (actions_retry_counter ?count)
     => 
     	(retract ?arc)
   		(assert (action-retry-counter (+ ?count 1)))
     	(retract ?bdis)
-    	(assert (BDistatus BDI-5)) 
+    	(assert (BDistatus BDI-CHECK-FWD-REPLAN)) 
 )
 
 
@@ -513,6 +535,7 @@
                 (param2 ?p2)
                 (param3 ?p3))
     (status (step ?s)) 
+    ?arc <- (actions_retry_counter ?count)
     =>
         (retract ?bdis)
         (retract ?ba-f)
@@ -520,6 +543,34 @@
         (retract ?baseq-f) ;Advance Basic Action Sequence Counter
         (assert (basic-actions-seq (+ 1 ?baseq)))
         (assert (BDistatus BDI-EXEC-check-plan))
+        (retract ?arc)
+  		(assert (action-retry-counter 0)) ;RESET actions retry counter
+)
+
+;Checks if (given that forward action is impossible) it's needed to replan or just wait one step
+; If retry-counter is 1, just wait
+(defrule BDI-CHECK-FWD-REPLAN-wait 
+    (declare (salience 65))
+    ?bdis <- (BDistatus BDI-CHECK-FWD-REPLAN)
+    (status (step ?s) (time ?t))    
+    ?arc <- (actions_retry_counter 1)
+    =>
+        (assert (printGUI (time ?t) (step ?s) (source "AGENT") (verbosity 1) (text  "Forward action impossible ! WAITING.")))      
+        (retract ?bdis)
+        (assert (BDistatus BDI-EXEC-ACTION))   
+        (assert (exec (step ?s) (action Wait)))  
+)
+
+; If retry-counter is > 1, try to replan path
+(defrule BDI-CHECK-FWD-REPLAN-replan-path 
+    (declare (salience 65))
+    ?bdis <- (BDistatus BDI-CHECK-FWD-REPLAN)
+    (status (step ?s) (time ?t))    
+    ?arc <- (actions_retry_counter 1)
+    =>
+        (assert (printGUI (time ?t) (step ?s) (source "AGENT") (verbosity 1) (text  "Forward action impossible ! Replanning path.")))      
+        (retract ?bdis)
+        (assert (BDistatus BDI-5))
 )
 
 

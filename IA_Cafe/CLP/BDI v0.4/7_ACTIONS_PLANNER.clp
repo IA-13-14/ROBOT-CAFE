@@ -51,6 +51,7 @@
     (status (step ?s) (time ?t))
     =>
         (assert (printGUI (time ?t) (step ?s) (source "AGENT::ACTIONS-PLANNER") (verbosity 2) (text  "No path from (%p1,%p2-%p3) to (%p4,%p5)") (param1 ?r) (param2 ?c) (param3 ?dir) (param4 ?d-r) (param5 ?d-c)))
+        (assert (ACTIONS-PLANNER-decode-action-result (result no)))
         (retract ?f)
 )
 
