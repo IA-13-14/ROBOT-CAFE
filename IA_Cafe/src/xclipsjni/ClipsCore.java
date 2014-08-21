@@ -282,7 +282,7 @@ public class ClipsCore {
 		PrimitiveValue fc = clips.eval("(get-focus)");
 		String focus = fc.toString();
 		String eval = "(facts)";
-		evaluate(focus, eval);
+		PrimitiveValue pv = evaluate(focus, eval);
 		router.stopRec();
 		return router.getStdout();
 	}
