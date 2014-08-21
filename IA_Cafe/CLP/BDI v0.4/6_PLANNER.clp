@@ -33,7 +33,7 @@
         (assert (PLANNER__runonce))
         (assert (PLANNER__planonce))
         (assert (printGUI (time ?t) (step ?s) (source "AGENT::PLANNER") (verbosity 2) (text  "PLANNER Module invoked")))
-        (halt)
+        ;(halt)
 )
 
 ;runonce section

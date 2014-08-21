@@ -94,7 +94,7 @@
     (node (ident ?id) (pos-r ?r) (pos-c ?c) (gcost ?g))  
     
     =>
-    (halt); for debug purpose
+   ;(halt); for debug purpose
     (printout t "(HALTED FOR DEBUG) Esiste soluzione per goal (" ?r "," ?c ") con costo "  ?g crlf)
     (assert (stampa ?id 0 -1))
     (assert (path-planning-result (success yes)))
@@ -108,7 +108,7 @@
     (node (ident ?id) (direction ?dir) (pos-r ?r) (pos-c ?c) (gcost ?g))  
     
     =>
-    (halt); for debug purpose
+    ;(halt); for debug purpose
     (printout t "(HALTED FOR DEBUG) Esiste soluzione per goal (" ?r "," ?c ") con costo "  ?g crlf)
     (assert (stampa ?id 0 -1))
     (assert (path-planning-result (success yes)))
@@ -212,7 +212,7 @@
     =>
     (retract ?f)
     (retract ?fi)
-    (halt)
+    ;(halt)
     (pop-focus)
 )
 
@@ -442,7 +442,7 @@
          (retract ?f1)
          (modify ?f2 (open no))
          (printout t "(HALTED FOR DEBUG) fail (last  node expanded " ?curr ")" crlf)
-         (halt)
+         ;(halt)
          (assert (path-planning-result (success no)))
          (assert (ppclean))
 )   

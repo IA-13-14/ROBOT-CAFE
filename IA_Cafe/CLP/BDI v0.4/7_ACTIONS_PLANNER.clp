@@ -151,6 +151,6 @@
     ?f <- (ACTIONS-PLANNER__init)
     =>
         (retract ?f)
-        (halt)
+        ;(halt)
         (pop-focus)
 )

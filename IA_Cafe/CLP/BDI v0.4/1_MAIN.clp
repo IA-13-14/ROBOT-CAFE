@@ -155,4 +155,5 @@
 => 
 	(printout t crlf " TIME OVER - Penalita' accumulate: " ?p crlf crlf)
 	(halt)
+	(halt)
 )
