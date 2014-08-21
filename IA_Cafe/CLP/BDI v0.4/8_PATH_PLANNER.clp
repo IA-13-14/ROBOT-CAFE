@@ -223,7 +223,7 @@
         (current ?curr)
         (node (ident ?curr) (direction north) (pos-r ?r) (pos-c ?c) (open yes))
         (K-cell (pos-r =(+ ?r 1)) (pos-c ?c) (contains Empty|Parking)) ;Cella presa dalla Kbase dell'agent
-
+		(not (K-cell (pos-r =(+ ?r 1)) (pos-c ?c) (contains ~Empty&~Parking))) ;non esiste percezione con cella occupata
         =>
         (assert (apply ?curr up ?r ?c))
 )
@@ -261,7 +261,7 @@
         (current ?curr)
         (node (ident ?curr) (direction south) (pos-r ?r) (pos-c ?c) (open yes))
         (K-cell (pos-r =(- ?r 1)) (pos-c ?c) (contains Empty|Parking)) ;Cella presa dalla Kbase dell'agent
-
+		(not (K-cell (pos-r =(- ?r 1)) (pos-c ?c) (contains ~Empty&~Parking))) ;non esiste percezione con cella occupata
         =>
         (assert (apply ?curr down ?r ?c))
 )
@@ -290,7 +290,7 @@
         (current ?curr)
         (node (ident ?curr) (direction east) (pos-r ?r) (pos-c ?c) (open yes))
         (K-cell (pos-r ?r) (pos-c =(+ ?c 1)) (contains Empty|Parking)) ;Cella presa dalla Kbase dell'agent
-
+		(not (K-cell (pos-r ?r) (pos-c =(+ ?c 1)) (contains ~Empty&~Parking))) ;non esiste percezione con cella occupata
         =>
         (assert (apply ?curr right ?r ?c))
 )
@@ -319,7 +319,7 @@
         (current ?curr)
         (node (ident ?curr) (direction west) (pos-r ?r) (pos-c ?c) (open yes))
         (K-cell (pos-r ?r) (pos-c =(- ?c 1)) (contains Empty|Parking)) ;Cella presa dalla Kbase dell'agent
-
+		(not (K-cell (pos-r ?r) (pos-c =(- ?c 1)) (contains ~Empty&~Parking))) ;non esiste percezione con cella occupata
         =>
         (assert (apply ?curr left ?r ?c))
 )
