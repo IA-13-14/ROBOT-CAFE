@@ -10,7 +10,6 @@
 
 ;WARNING: Deftemplates used by AGENT must be defined in AGENT Module !
 
-
 ;Initilization
 (defrule DELIBERATE__init-rule
     (declare (salience 100))

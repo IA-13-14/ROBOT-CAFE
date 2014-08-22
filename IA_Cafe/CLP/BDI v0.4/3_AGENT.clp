@@ -348,6 +348,22 @@
         (retract ?pa)        
 )
 
+;TEST: begging plan for optimization
+;Planning-beginning-plan-goto-FD
+(defrule BDI_loop_4_planning-beginning-plan-goto-FD
+    (declare (salience 80))
+    ?bdis <- (BDistatus BDI-4)    
+    ?paseq <- (plan-actions-seq ?)
+    (status (step ?s&:(= ?s 0)) (time ?t))     
+    =>
+        (retract ?bdis)        
+        (retract ?paseq)
+        (assert (plan-actions-seq 0))
+        (assert (printGUI (time ?t) (step ?s) (source "AGENT") (verbosity 2) (text  "BDI - Planning !")))
+        (focus PLANNER)
+        (assert (BDistatus BDI-5))
+)
+
 ;Planning
 (defrule BDI_loop_4_planning
     (declare (salience 80))

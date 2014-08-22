@@ -47,7 +47,22 @@
 ;)
 
 (deffunction manh-cost(?r ?c ?d-r ?d-c)
-    (* 2 (+ (abs (- ?d-r ?r)) (abs (- ?d-c ?c)) ))
+    (+ (abs (- ?d-r ?r)) (abs (- ?d-c ?c)))
+)
+
+;#### Beginning plan -> goto FD ####
+(defrule beginning-plan-goto-FD
+	(declare (salience 95))
+	?f <- (PLANNER__runonce)
+	(status (step ?s&:(= ?s 0)) (time ?t))	    
+    (K-agent (step ?s) (pos-r ?ag-r) (pos-c ?ag-c))
+	;FD Best position
+    (access-cell (object FD) (obj-r ?fd-r) (obj-c ?fd-c) (pos-r ?r) (pos-c ?c))
+    (not (access-cell (object FD) (pos-r ?r1) (pos-c ?c1&:(> (manh-cost ?ag-r ?ag-c ?r ?c) (manh-cost ?ag-r ?ag-c ?r1 ?c1)))))
+	=>
+		(assert (printGUI (time ?t) (step ?s) (source "AGENT::PLANNER") (verbosity 2) (text  "Planning for Beginning-plan-goto-FD")))
+        (assert (plan-action (seq 0) (action Goto) (param1 ?r) (param2 ?c)))
+        (retract ?f)
 )
 
 ;#### Serve table plan ####
