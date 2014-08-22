@@ -1,4 +1,6 @@
-BDI v.04
+BDI v0.5 (4desire strategy)
 --------
 
-Test di pianificazione con piano statico adattivo ai parametri dell'ordine
+Implementata strategia a 4 desire di Leo
+
+TODO: Se necessario, provare ad aggiungere il piano iniziale per il goto FD
