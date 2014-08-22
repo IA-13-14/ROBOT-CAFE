@@ -47,9 +47,10 @@
 
 (deftemplate cleanstatus
 	(slot step)
-        (slot time)
+    (slot time)
 	(slot arrivaltime)	
-	(slot requested-by)	;// tavolo richiedente	
+	(slot requested-by)	;// tavolo coinvolto nella richiesta
+    (slot source)           ;// agent se agent ha fatto checkfinish positiva, altrimenti il tavolo	
 )
 
 (deftemplate personstatus 	;// informazioni sulla posizione delle persone
@@ -314,7 +315,7 @@
 	(status (step ?i) (time ?t))
 ?f1<-	(event (step ?i) (type request) (source ?tb) (food ?nf) (drink ?nd))
 	(tablestatus (step ?i) (table-id ?tb) (clean no))
-        (event (step ?ii&:(< ?ii ?i)) (type finish) (source ?tb))
+    (cleanstatus (step ?i) (arrivaltime ?tt&:(< ?tt ?t)) (requested-by ?tb))
 => 
 	(assert 
 		(orderstatus (step ?i) (time ?t) (arrivaltime ?t) (requested-by ?tb) 
@@ -336,10 +337,14 @@
 	(status (step ?i) (time ?t))
 ?f1<-	(event (step ?i) (type finish) (source ?tb))
 	(tablestatus (step ?i) (table-id ?tb) (clean no))
-=> 
-	(assert 	
-		(cleanstatus (step ?i) (time ?t) (arrivaltime ?t) (requested-by ?tb))
-                (msg-to-agent (request-time ?t) (step ?i) (sender ?tb) (type finish))
+ 	(not (cleanstatus (step ?i) (arrivaltime ?tt&:(< ?tt ?t)) (requested-by ?tb))) ;non c'è già stato un finish
+    (not (orderstatus (step ?i) (time ?t) (requested-by ?tb)))   ;l'ordine è stato completato
+
+    => 
+
+	(assert	
+		(cleanstatus (step ?i) (time ?t) (arrivaltime ?t) (requested-by ?tb) (source ?tb))
+        (msg-to-agent (request-time ?t) (step ?i) (sender ?tb) (type finish))
 	)
 	(retract ?f1)
 	(printout t crlf " ENVIRONMENT:" crlf)
@@ -356,7 +361,7 @@
 (defrule CleanEvolution1       
 	(declare (salience 10))
 	(status (time ?t) (step ?i))
-?f1<-	(cleanstatus (step = (- ?i 1)) (time ?tt) (arrivaltime ?at) (requested-by ?tb))
+?f1<-	(cleanstatus (step = (- ?i 1)) (time ?tt) (arrivaltime ?at) (requested-by ?tb) (source ?tb))
 	(not (cleanstatus (step ?i)  (arrivaltime ?at) (requested-by ?tb))) 
 ?f2<-	(penalty ?p)
 => 
@@ -697,12 +702,15 @@
 	(tablestatus (step ?i) (table-id ?tb) (clean no))
         (msg-to-agent  (request-time ?rt)  (step ?ii) (sender ?tb) (type order))
         (not (orderstatus (step ?i) (time ?t) (requested-by ?tb)))
-        (not (cleanstatus (step ?i) (arrivaltime ?at&:(> ?at ?rt)) (requested-by ?tb)))
+        (not (cleanstatus (step ?i) (arrivaltime ?at&:(> ?at ?rt)) (requested-by ?tb) (source ?tb)))
         (test (> (- ?t ?rt)  100))
 => 
 	(modify ?f2 (step (+ ?i 1)) (time (+ ?t 40)))
 	(modify ?f1 (step (+ ?i 1)) (time (+ ?t 40)))
-	(assert (perc-finish (step (+ ?i 1)) (time (+ ?t 40)) (finish yes)))
+	(assert
+		(perc-finish (step (+ ?i 1)) (time (+ ?t 40)) (finish yes))
+		(cleanstatus (step (+ ?i 1)) (time (+ ?t 40)) (arrivaltime (+ ?t 40)) (requested-by ?tb) (source agent)))
+	)
 )
 ;// Operazione OK- Risposta no
 (defrule CheckFinish_OK_NO
@@ -715,7 +723,7 @@
 ?f3<-	(tablestatus (step ?i) (table-id ?tb) (clean no))
         (msg-to-agent  (request-time ?rt)  (step ?ii) (sender ?tb) (type order))
         (not (orderstatus (step ?i) (time ?t) (requested-by ?tb)))
-        (not (cleanstatus (step ?i) (arrivaltime ?iii&:(> ?iii ?ii)) (requested-by ?tb)))
+        (not (cleanstatus (step ?i) (arrivaltime ?iii&:(> ?iii ?ii)) (requested-by ?tb) (source ?tb)))
         (test (or (= (- ?t ?rt)  100) (< (- ?t ?rt)  100)))
 => 
 	(modify ?f2 (step (+ ?i 1)) (time (+ ?t 40)))
