@@ -167,7 +167,7 @@
     (declare (salience 15))    
     (not (init-agent (done yes)))
     (K-cell (pos-r ?r) (pos-c ?c) (contains ?obj&~Wall&~Person&~Empty&~Parking&~Seat) (initial yes))
-    (K-cell (pos-r ?r2&:(= ?r2(+ ?r 1))) (pos-c ?c) (contains ?obj2&Parking|Empty) (initial yes))
+    (K-cell (pos-r ?r2&:(= ?r2(+ ?r 1))) (pos-c ?c) (contains ?obj2&Empty) (initial yes))
     =>
         (assert (access-cell (object ?obj) (obj-r ?r) (obj-c ?c) (pos-r ?r2) (pos-c ?c)))            
 )
@@ -176,7 +176,7 @@
     (declare (salience 15))    
     (not (init-agent (done yes)))
     (K-cell (pos-r ?r) (pos-c ?c) (contains ?obj&~Wall&~Person&~Empty&~Parking&~Seat) (initial yes))
-    (K-cell (pos-r ?r2&:(= ?r2(- ?r 1))) (pos-c ?c) (contains ?obj2&Parking|Empty) (initial yes))
+    (K-cell (pos-r ?r2&:(= ?r2(- ?r 1))) (pos-c ?c) (contains ?obj2&Empty) (initial yes))
     =>
         (assert (access-cell (object ?obj) (obj-r ?r) (obj-c ?c) (pos-r ?r2) (pos-c ?c)))            
 )
@@ -185,7 +185,7 @@
     (declare (salience 15))    
     (not (init-agent (done yes)))
     (K-cell (pos-r ?r) (pos-c ?c) (contains ?obj&~Wall&~Person&~Empty&~Parking&~Seat) (initial yes))
-    (K-cell (pos-r ?r) (pos-c ?c2&:(= ?c2(+ ?c 1))) (contains ?obj2&Parking|Empty) (initial yes))
+    (K-cell (pos-r ?r) (pos-c ?c2&:(= ?c2(+ ?c 1))) (contains ?obj2&Empty) (initial yes))
     =>
         (assert (access-cell (object ?obj) (obj-r ?r) (obj-c ?c) (pos-r ?r) (pos-c ?c2)))            
 )
@@ -194,7 +194,7 @@
     (declare (salience 15))    
     (not (init-agent (done yes)))
     (K-cell (pos-r ?r) (pos-c ?c) (contains ?obj&~Wall&~Person&~Empty&~Parking&~Seat) (initial yes))
-    (K-cell (pos-r ?r) (pos-c ?c2&:(= ?c2(- ?c 1))) (contains ?obj2&Parking|Empty) (initial yes))
+    (K-cell (pos-r ?r) (pos-c ?c2&:(= ?c2(- ?c 1))) (contains ?obj2&Empty) (initial yes))
     =>
         (assert (access-cell (object ?obj) (obj-r ?r) (obj-c ?c) (pos-r ?r) (pos-c ?c2)))            
 )
@@ -398,6 +398,18 @@
 ;### DONE - CHECK !!!! Empty Basic Action ###
 ; !!!!!!!!!!!!!!!!!!!!!!!!!!!
 ;CHECK IF WORKS
+
+;Empty basic actions if replanning
+(defrule BDI_loop_5_clear_basic_actions_if_replanning
+    (declare (salience 76))
+    ?bdis <- (BDistatus BDI-5)
+    ;Replan basic action if basic actions plan is empty or if actions retry > 1
+    ;(actions retry = 1 if waiting for 1 time for a person to move !)
+    (actions_retry_counter ?art&:(> ?art 1))       
+    ?pa <- (basic-action)        
+    =>
+        (retract ?pa) 
+)
 
 ;Actions-Planning
 (defrule BDI_loop_5
