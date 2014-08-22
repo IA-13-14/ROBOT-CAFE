@@ -363,6 +363,7 @@
     (not (cleanstatus (step ?i)  (arrivaltime ?at) (requested-by ?tb))) 
 ?f2<-   (penalty ?p)
 => 
+	(assert (printGUI (time ?t) (step ?i) (source "ENV") (verbosity 1) (text  "Penalty %p1 waiting clean on table %p2") (param1 (* (- ?t ?tt) 3)) (param2 ?tb)))
     (modify ?f1 (time ?t) (step ?i))
     (assert (penalty (+ ?p (* (- ?t ?tt) 3))))
     (retract ?f2)   
@@ -378,7 +379,8 @@
     (not (orderstatus (step ?i) (arrivaltime ?at) (requested-by ?tb)
                      (answer ~pending)))
 ?f2<- (penalty ?p)
-=> 
+=> 	
+	(assert (printGUI (time ?t) (step ?i) (source "ENV") (verbosity 1) (text  "Penalty 50 for not Inform on order %p1 from table %p2") (param1 ?at) (param2 ?tb)))              
     (modify ?f1 (time ?t) (step ?i))
     (assert (penalty (+ ?p (* (- ?t ?tt) 50))))
     (retract ?f2)
@@ -395,7 +397,8 @@
         (not (orderstatus (step ?i) (arrivaltime ?at) (requested-by ?tb)))
 ?f2<-   (penalty ?p)
 => 
-        (modify ?f1 (time ?t) (step ?i))
+	(assert (printGUI (time ?t) (step ?i) (source "ENV") (verbosity 1) (text  "Penalty %p1 for order %p2 from table %p3 waiting") (param1 (* (- ?t ?tt) (max 1 (* (+ (- ?nd ?dd) (- ?nf ?df)) 2)))) (param2 ?at) (param3 ?tb)))
+    (modify ?f1 (time ?t) (step ?i))
     (assert (penalty (+ ?p (* (- ?t ?tt) (max 1 (* (+ (- ?nd ?dd) (- ?nf ?df)) 2))))))
     (retract ?f2)
 )
@@ -411,7 +414,8 @@
         (not (orderstatus (step ?i) (arrivaltime ?at) (requested-by ?tb)))
 ?f2<-   (penalty ?p)
 => 
-        (modify ?f1 (time ?t) (step ?i))
+	(assert (printGUI (time ?t) (step ?i) (source "ENV") (verbosity 1) (text  "Penalty %p1 for order %p2 from table %p3 delayed") (param1 (* (- ?t ?tt) (max 1 (+ (- ?nd ?dd) (- ?nf ?df))))) (param2 ?at) (param3 ?tb)))
+    (modify ?f1 (time ?t) (step ?i))
     (assert (penalty (+ ?p (* (- ?t ?tt) (max 1 (+ (- ?nd ?dd) (- ?nf ?df)))))))
     (retract ?f2)
 )
@@ -509,6 +513,7 @@
     (agentstatus (step ?i) (time ?t) (pos-r ?r) (pos-c ?c))
 ?f2<-   (penalty ?p)
 => 
+	(assert (printGUI (time ?t) (step ?i) (source "ENV") (verbosity 1) (text  "Penalty %p1 for stopping customer") (param1 (* (- ?t ?tt) 20))))
     (modify  ?f1 (time ?t) (step ?i))
     (assert (penalty (+ ?p (* (- ?t ?tt) 20))))
     (retract ?f2)
@@ -583,6 +588,7 @@
     (tablestatus (step ?i) (time ?t) (table-id ?tb) (clean no)) 
 ?f4<-   (penalty ?p)    
 => 
+	(assert (printGUI (time ?t) (step ?i) (source "ENV") (verbosity 1) (text  "Penalty 500000 for accepting wrong order %p1 on table %p2") (param1 ?request) (param2 ?tb)))
     (modify ?f1 (time (+ ?t 1)) (step (+ ?i 1)))
     (modify ?f2 (time (+ ?t 1)) (step (+ ?i 1)) (answer accepted))
     (modify ?f3 (time (+ ?t 1)) (step (+ ?i 1)))
@@ -619,7 +625,8 @@
     (modify ?f1 (time (+ ?t 1)) (step (+ ?i 1)))
     (modify ?f2 (time (+ ?t 1)) (step (+ ?i 1)) (answer delayed))
     (modify ?f3 (time (+ ?t 1)) (step (+ ?i 1)))
-        (assert (penalty (+ ?p 500000)))
+    (assert (printGUI (time ?t) (step ?i) (source "ENV") (verbosity 1) (text  "Penalty 500000 for delaying order %p1 on table %p2") (param1 ?request) (param2 ?tb)))    
+    (assert (penalty (+ ?p 500000)))
     (retract ?f4)
 )
 ;// l'agente ha inviato inform che l'ordine � rejected (e non va bene dovrebbe essere accepted)
@@ -635,7 +642,8 @@
     (modify ?f1 (time (+ ?t 1)) (step (+ ?i 1)))
     (modify ?f2 (time (+ ?t 1)) (step (+ ?i 1)) (answer rejected))
     (modify ?f3 (time (+ ?t 1)) (step (+ ?i 1)))
-        (assert (penalty (+ ?p 5000000)))
+    (assert (printGUI (time ?t) (step ?i) (source "ENV") (verbosity 1) (text  "Penalty 500000 for rejecting order %p1 on table %p2") (param1 ?request) (param2 ?tb)))    
+    (assert (penalty (+ ?p 5000000)))
     (retract ?f4)
 )
 ;// l'agente ha inviato inform che l'ordine � rejected (e non va bene dovrebbe essere delayed)
@@ -652,7 +660,8 @@
     (modify ?f1 (time (+ ?t 1)) (step (+ ?i 1)))
     (modify ?f2 (time (+ ?t 1)) (step (+ ?i 1)) (answer accepted))
     (modify ?f3 (time (+ ?t 1)) (step (+ ?i 1)))
-        (assert (penalty (+ ?p 5000000)))
+    (assert (printGUI (time ?t) (step ?i) (source "ENV") (verbosity 1) (text  "Penalty 500000 for rejecting order %p1 on table %p2") (param1 ?request) (param2 ?tb)))
+    (assert (penalty (+ ?p 5000000)))
     (retract ?f4)
 )
 
@@ -669,9 +678,9 @@
 => 
     (modify ?f1 (time (+ ?t 1)) (step (+ ?i 1)))
     (modify ?f3 (time (+ ?t 1)) (step (+ ?i 1)))
-        (assert (penalty (+ ?p 10000)))
-        (retract ?f4)
-    
+    (assert (printGUI (time ?t) (step ?i) (source "ENV") (verbosity 1) (text  "Penalty 10000 for accepting not pending order %p1 on table %p2") (param1 ?request) (param2 ?tb)))    
+    (assert (penalty (+ ?p 10000)))
+    (retract ?f4)    
 )
 
 ;// arriva un'inform per una richiesta not fatta dal tavolo
@@ -685,6 +694,7 @@
 => 
     (modify ?f1 (time (+ ?t 1)) (step (+ ?i 1)))
     (modify ?f3 (time (+ ?t 1)) (step (+ ?i 1)))
+    (assert (printGUI (time ?t) (step ?i) (source "ENV") (verbosity 1) (text  "Penalty 500000 for accepting with wrong parameters the order %p1 on table %p2") (param1 ?request) (param2 ?tb)))    
     (assert (penalty (+ ?p 500000)))
     (retract ?f4)
 )
@@ -816,8 +826,9 @@
 => 
     (modify ?f2 (step (+ ?i 1)) (time (+ ?t 30)))
     (modify ?f1 (step (+ ?i 1)) (time (+ ?t 30))) 
+    (assert (printGUI (time ?t) (step ?i) (source "ENV") (verbosity 1) (text  "Penalty 500000 for checkfinish away from table %p1") (param1 ?tb)))    
     (assert (penalty (+ ?p  500000)))
-        (retract ?f5)
+    (retract ?f5)
 ) 
 ;// L'azione di CheckFinish fallisce perch� la posizione indicata non 
 ;//contiene un tavolo 
@@ -831,8 +842,9 @@
 => 
     (modify ?f2 (step (+ ?i 1)) (time (+ ?t 30)))
     (modify ?f1 (step (+ ?i 1)) (time (+ ?t 30))) 
+    (assert (printGUI (time ?t) (step ?i) (source "ENV") (verbosity 1) (text  "Penalty 500000 for checkfinish on wrong position")))
     (assert (penalty (+ ?p  500000)))
-        (retract ?f5)
+    (retract ?f5)
 ) 
 ;// __________________________________________________________________________________________
 ;// REGOLE PER il Clean Table
@@ -923,6 +935,7 @@
                     (l_d_waste yes) (l_f_waste yes))
     (modify ?f3 (step (+ ?i 1)) (time (+ ?t (+ 10 ( * 2 ?tld) (* 3 ?tlf))))
                     (l-drink 0) (l-food 0) (clean yes))
+   	(assert (printGUI (time ?t) (step ?i) (source "ENV") (verbosity 1) (text  "Penalty 500000 for cleaning table without FINISH or CHECKFINISH successful on table %p1") (param1 ?tb)))
     (assert (penalty (+ ?p 500000)))
         (retract ?f5)
 )
@@ -942,8 +955,9 @@
     (modify ?f1 (step (+ ?i 1)) (time (+ ?t 30)) 
                     (l_d_waste ?dw) (l_f_waste ?fw))
     (modify ?f3 (step (+ ?i 1)) (time (+ ?t 30)))
+    (assert (printGUI (time ?t) (step ?i) (source "ENV") (verbosity 1) (text  "Penalty 10000 for cleaning a clean table %p2") (param1 ?tb)))    
     (assert (penalty (+ ?p 10000)))
-        (retract ?f5)
+    (retract ?f5)
 )
 
 
@@ -962,6 +976,7 @@
 => 
     (modify ?f2 (step (+ ?i 1)) (time (+ ?t 30)))
     (modify ?f1 (step (+ ?i 1)) (time (+ ?t 30)))
+    (assert (printGUI (time ?t) (step ?i) (source "ENV") (verbosity 1) (text  "Penalty 500000 for cleaning table with food")))    
     (assert (penalty (+ ?p  500000)))
         (retract ?f5)
 )    
@@ -1167,8 +1182,9 @@
 => 
     (modify ?f2 (step (+ ?i 1)) (time (+ ?t 5)))
     (modify ?f1 (step (+ ?i 1)) (time (+ ?t 5)))
-        (assert (penalty (+ ?p  100000)))
-        (retract ?f5)
+    (assert (printGUI (time ?t) (step ?i) (source "ENV") (verbosity 1) (text  "Penalty 100000 for loading food when full")))
+    (assert (penalty (+ ?p  100000)))
+    (retract ?f5)
 )    
 ;// Operazione fallisce perch� l'agente � gi� carico di immondizia
 (defrule load-food_KO2
@@ -1251,8 +1267,9 @@
 => 
     (modify ?f2 (step (+ ?i 1)) (time (+ ?t 6)))
     (modify ?f1 (step (+ ?i 1)) (time (+ ?t 6)))
-        (assert (penalty (+ ?p  100000)))
-        (retract ?f5)
+    (assert (printGUI (time ?t) (step ?i) (source "ENV") (verbosity 1) (text  "Penalty 100000 forloading drink when full")))
+    (assert (penalty (+ ?p  100000)))
+    (retract ?f5)
 )    
 ;// Operazione fallisce perch� l'agente � gi� carico di immondizia
 (defrule load-drink_KO2
