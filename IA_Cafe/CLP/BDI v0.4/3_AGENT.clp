@@ -244,7 +244,7 @@
     =>
         (assert (AGENT__init))
         (assert (printGUI (time ?t) (step ?s) (source "AGENT") (verbosity 2) (text  "BDI Loop started !")))
-        (assert (actions_retry_counter 0))
+        ;(assert (actions_retry_counter 0))
         (assert (BDistatus BDI-1))
 )
 
@@ -403,7 +403,9 @@
 (defrule BDI_loop_5
     (declare (salience 75))
     ?bdis <- (BDistatus BDI-5)
-    (or (not (basic-action)) (actions_retry_counter ?art&:(> ?art 0)))    
+    ;Replan basic action if basic actions plan is empty or if actions retry > 1
+    ;(actions retry = 1 if waiting for 1 time for a person to move !)
+    (or (not (basic-action)) (actions_retry_counter ?art&:(> ?art 1)))    
     (plan-actions-seq ?seq)
     ?baseq-f <- (basic-actions-seq ?ba-seq)
     (plan-action (seq ?seq)
@@ -443,7 +445,9 @@
     (status (step ?s) (time ?t))        
     =>
         (assert (printGUI (time ?t) (step ?s) (source "AGENT") (verbosity 2) (text  "BDI - Nothing to do, will Wait !")))
-        (assert (exec (step ?s) (action Wait))) ;Waiting action
+        ;### CHECK - Wait too expensive, Turn instead ###
+        ;(assert (exec (step ?s) (action Wait))) ;Waiting action
+        (assert (exec (step ?s) (action Turnright))) ;Waiting action
         (retract ?baseq-f) ;Reset Basic Action Sequence Counter
         (assert (basic-actions-seq 0))
         (retract ?bdis)
@@ -460,9 +464,25 @@
     =>
      	(assert (printGUI (time ?t) (step ?s) (source "AGENT") (verbosity 2) (text  "ACTIONS PLANNER FAILED, WAITING !")))
         (retract ?bdis)
-        (assert (exec (step ?s) (action Wait)))        
+        ;### CHECK - Wait too expensive, Turn instead ###
+        ;(assert (exec (step ?s) (action Wait)))        
+        (assert (exec (step ?s) (action Turnright))) ;No need to worry, next loop path_planner will know that we turned !
         (assert (BDistatus BDI-EXEC-ACTION))
         (retract ?apr)
+)
+
+;Compensation for previous Turnright (waiting) move
+(defrule compensate-turnright
+ 	(declare (salience 71))
+ 	?bdis <- (BDistatus BDI-6)
+	?ctr <- (compensate Turnright)
+	(status (step ?s) (time ?t)) 
+	=>
+		(assert (printGUI (time ?t) (step ?s) (source "AGENT") (verbosity 2) (text  "Compensating Turnright (Wait) Action !")))
+		(retract ?bdis)
+		(retract ?ctr)
+		(assert (exec (step ?s) (action Turnleft))) ;Compensation for previous Turnright !
+        (assert (BDistatus BDI-EXEC-ACTION))
 )
 
 ;###Check if head action is impossible###
@@ -478,7 +498,7 @@
     ?arc <- (actions_retry_counter ?count)
     => 
     	(retract ?arc)
-  		(assert (action-retry-counter (+ ?count 1)))
+  		(assert (actions_retry_counter (+ ?count 1)))
     	(retract ?bdis)
     	(assert (BDistatus BDI-CHECK-FWD-REPLAN)) 
 )
@@ -494,7 +514,7 @@
     ?arc <- (actions_retry_counter ?count)
     => 
     	(retract ?arc)
-  		(assert (action-retry-counter (+ ?count 1)))
+  		(assert (actions_retry_counter (+ ?count 1)))
     	(retract ?bdis)
     	(assert (BDistatus BDI-CHECK-FWD-REPLAN))  
 )
@@ -526,7 +546,7 @@
     ?arc <- (actions_retry_counter ?count)
     => 
     	(retract ?arc)
-  		(assert (action-retry-counter (+ ?count 1)))
+  		(assert (actions_retry_counter (+ ?count 1)))
     	(retract ?bdis)
     	(assert (BDistatus BDI-CHECK-FWD-REPLAN)) 
 )
@@ -553,7 +573,7 @@
         (assert (basic-actions-seq (+ 1 ?baseq)))
         (assert (BDistatus BDI-EXEC-check-plan))
         (retract ?arc)
-  		(assert (action-retry-counter 0)) ;RESET actions retry counter
+  		(assert (actions_retry_counter 0)) ;RESET actions retry counter
 )
 
 ;Checks if (given that forward action is impossible) it's needed to replan or just wait one step
@@ -564,10 +584,13 @@
     (status (step ?s) (time ?t))    
     ?arc <- (actions_retry_counter 1)
     =>
-        (assert (printGUI (time ?t) (step ?s) (source "AGENT") (verbosity 1) (text  "Forward action impossible ! WAITING.")))      
+        (assert (printGUI (time ?t) (step ?s) (source "AGENT") (verbosity 1) (text  "Forward action impossible, first time ! WAITING.")))      
         (retract ?bdis)
-        (assert (BDistatus BDI-EXEC-ACTION))   
-        (assert (exec (step ?s) (action Wait)))  
+        (assert (BDistatus BDI-EXEC-ACTION))
+        ;### CHECK - Wait too expensive, Turn instead ###
+        ;(assert (exec (step ?s) (action Wait)))  
+        (assert (exec (step ?s) (action Turnright)))
+        (assert (compensate Turnright))
 )
 
 ; If retry-counter is > 1, try to replan path
@@ -575,9 +598,9 @@
     (declare (salience 65))
     ?bdis <- (BDistatus BDI-CHECK-FWD-REPLAN)
     (status (step ?s) (time ?t))    
-    ?arc <- (actions_retry_counter 1)
+    ?arc <- (actions_retry_counter ?rc&:(> ?rc 1))
     =>
-        (assert (printGUI (time ?t) (step ?s) (source "AGENT") (verbosity 1) (text  "Forward action impossible ! Replanning path.")))      
+        (assert (printGUI (time ?t) (step ?s) (source "AGENT") (verbosity 1) (text  "Forward action impossible, for 2 times ! Replanning path.")))      
         (retract ?bdis)
         (assert (BDistatus BDI-5))
 )
