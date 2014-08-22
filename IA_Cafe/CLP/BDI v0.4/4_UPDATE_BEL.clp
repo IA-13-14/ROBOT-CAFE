@@ -6,6 +6,17 @@
 (defmodule UPDATE-BEL (import MAIN ?ALL) (import AGENT ?ALL) (export ?ALL))
 
 ; Initialization
+(defrule init-update-K-table-new-step
+	(declare (salience 105))
+    (not (UPDATE-BEL__init))
+    (status (step ?s) (time ?t)) 
+	;(K-table (step =(- ?s 1)) (table ?tab) (state ?state) (food ?f) (drink ?d))
+	?ktf <- (K-table (step =(- ?s 1)) (table ?tab) (state ?state) (food ?f) (drink ?d))
+	=>
+		;(assert (K-table (step ?s) (table ?tab) (state ?state) (food ?f) (drink ?d))) ;K-table for the new step
+		(modify ?ktf (step ?s)) ;update K-table for the new step
+)  
+
 (defrule init-rule-new-step
     (declare (salience 100))
     (not (UPDATE-BEL__init))
@@ -255,7 +266,7 @@
               (sender ?snd)
               (type finish)
            )
-    ?k <- (K-table (table ?snd))
+    ?k <- (K-table (step ?s) (table ?snd))
     =>
 
     (assert (dummy))
@@ -353,7 +364,7 @@
     (exec-history (step =(- ?s 1)) (action DeliveryFood) (param1 ?p1) (param2 ?p2) (param3 ?p3))
     (Table (table-id ?tid) (pos-r ?p1) (pos-c ?p2))
     ?ka <- (K-agent (step ?s) (time ?t) (l-food ?l-food))   
-    ?kt <- (K-table (table ?tid) (food ?tf))
+    ?kt <- (K-table  (step ?s) (table ?tid) (food ?tf))
     ?f <- (UPDATE-BEL__exec-history-runonce)
     =>
         (assert (printGUI (time ?t) (step ?s) (source "AGENT::UPDATE-BEL") (verbosity 2) (text  "Perceived Load (%p1) with DeliveryFood at table (%p2), current Food (%p3)") (param1 ?load) (param2 ?tid) (param3 (- ?l-food 1))))
@@ -374,7 +385,7 @@
     (exec-history (step =(- ?s 1)) (action DeliveryDrink) (param1 ?p1) (param2 ?p2) (param3 ?p3))
     (Table (table-id ?tid) (pos-r ?p1) (pos-c ?p2))
     ?ka <- (K-agent (step ?s) (time ?t) (l-drink ?l-drink))   
-    ?kt <- (K-table (table ?tid) (drink ?td))
+    ?kt <- (K-table  (step ?s) (table ?tid) (drink ?td))
     ?f <- (UPDATE-BEL__exec-history-runonce)
     =>
         (assert (printGUI (time ?t) (step ?s) (source "AGENT::UPDATE-BEL") (verbosity 2) (text  "Perceived Load (%p1) with DeliveryDrink at table (%p2), current Drink (%p3)") (param1 ?load) (param2 ?tid) (param3 (- ?l-drink 1))))
@@ -390,7 +401,7 @@
     (exec-history (step =(- ?s 1)) (action CleanTable) (param1 ?p1) (param2 ?p2) (param3 ?p3))
     (Table (table-id ?tid) (pos-r ?p1) (pos-c ?p2))
     ?ka <- (K-agent (step ?s) (time ?t) (l_f_waste ?lw-food) (l_d_waste ?lw-drink))   
-    ?kt <- (K-table (table ?tid))
+    ?kt <- (K-table  (step ?s) (table ?tid))
     ?f <- (UPDATE-BEL__exec-history-runonce)
     =>
         (assert (printGUI (time ?t) (step ?s) (source "AGENT::UPDATE-BEL") (verbosity 2) (text  "After CleanTable on table (%p1) loaded Waste Food and Drink") (param1 ?tid)))
@@ -434,7 +445,7 @@
     (exec-history (step =(- ?s 1)) (action CheckFinish) (param1 ?p1) (param2 ?p2) (param3 ?p3))
     (Table (table-id ?tid) (pos-r ?p1) (pos-c ?p2))
     ?ka <- (K-agent (step ?s) (time ?t) (pos-r ?r) (pos-c ?c))
-    ?kt <- (K-table (table ?tid))
+    ?kt <- (K-table (step ?s) (table ?tid))
     ?f <- (UPDATE-BEL__exec-history-runonce)
     =>
 
@@ -454,7 +465,7 @@
     (exec-history (step =(- ?s 1)) (action CheckFinish) (param1 ?p1) (param2 ?p2) (param3 ?p3))
     (Table (table-id ?tid) (pos-r ?p1) (pos-c ?p2))
     ?ka <- (K-agent (step ?s) (time ?t) (pos-r ?r) (pos-c ?c))
-    ?kt <- (K-table (table ?tid))
+    ?kt <- (K-table (step ?s) (table ?tid))
     ?f <- (UPDATE-BEL__exec-history-runonce)
     =>
 

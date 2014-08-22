@@ -77,6 +77,8 @@
             (order ?d-order)
     )
     (not (desire (step ?d-s2&:(< ?d-s2 ?d-s))))
+    ;Check if order can be served = table clean
+    (K-table (step ?s) (table ?d-table) (state Clean))
     ?f <- (intentions_changed (changed ?))
     =>
         (assert (printGUI (time ?t) (step ?s) (source "AGENT::DELIBERATE") (verbosity 2) (text  "Selected intention (Time:%p1,Type:%p2,T:%p3)") (param1 ?d-t) (param2 ?d-type) (param3 ?d-table)))        

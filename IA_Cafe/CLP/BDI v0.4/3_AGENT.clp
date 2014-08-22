@@ -263,6 +263,8 @@
 )
 
 
+;#### TODO: accettare in futuro l'ordine delayed !!!! ####
+
 ;#### TODO: controllare che funzioni la scelta e che le K-table funzionino anche come step e ordine ####
 ;answer to new orders immediately and goto 0 !!!!
 ;delay order
@@ -272,7 +274,7 @@
     ?ansor <- (answer-to-order (step ?os) (time ?ot) (order ?req-id))
     (order (step ?os) (time ?ot) (req-id ?req-id) (table ?otable) (food ?ofood) (drink ?odrink))
     (status (step ?s))       
-    (K-table (table ?otable) (state ~Clean)) 
+    (K-table (step ?s) (table ?otable) (state ~Clean)) 
     =>
         (retract ?bdis)
         (retract ?ansor)

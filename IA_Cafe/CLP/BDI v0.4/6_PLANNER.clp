@@ -267,13 +267,13 @@
 
 ;#### Clean table plan ####
 
-(defrule clean-table
+(defrule clean-table-plan-start
     (PLANNER__runonce)
     (not (planning))
 	(intention  (table ?tab)
                 (type clean)
     )
-    (K-table (table ?tab) (state Dirty))
+    (K-table (step ?s) (table ?tab) (state Dirty))
     (status (step ?s) (time ?t))
     (K-agent (step ?s) (pos-r ?ag-r) (pos-c ?ag-c))
     =>
@@ -300,7 +300,7 @@
 (defrule clean-table-objectives-food
 	(declare (salience 50))
 	(planning (type cleantable) (step objectives) (param1 ?tab))
-   	(K-table (table ?tab) (food ?ft))
+   	(K-table (step ?s) (table ?tab) (food ?ft))
    	(test (> ?ft 0))
    	;TB Best position
     (var agentPos ?ag-r ?ag-c)
@@ -315,7 +315,7 @@
 (defrule clean-table-objectives-drink
 	(declare (salience 50))
 	(planning (type cleantable) (step objectives) (param1 ?tab))
-   	(K-table (table ?tab) (drink ?dt))
+   	(K-table (step ?s) (table ?tab) (drink ?dt))
    	(test (> ?dt 0))
    	;RB Best position
     (var agentPos ?ag-r ?ag-c)
