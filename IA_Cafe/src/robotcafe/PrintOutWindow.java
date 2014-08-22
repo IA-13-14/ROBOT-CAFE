@@ -43,10 +43,10 @@ public class PrintOutWindow extends javax.swing.JFrame {
         
         //tabella dei colori
         sources = new HashMap<>();
-        sources.put("SYSTEM", Color.red);
+        sources.put("SYSTEM", Color.decode("#32CD32"));
         sources.put("AGENT", Color.blue);
         sources.put("PLANNER", Color.darkGray);
-        sources.put("ENV", Color.decode("#32CD32"));
+        sources.put("ENV", Color.red);
         sources.put("AGENT::UPDATER-BEL", Color.PINK);
         
         table = new Hashtable<>();

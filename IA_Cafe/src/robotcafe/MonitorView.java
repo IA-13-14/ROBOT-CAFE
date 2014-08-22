@@ -349,6 +349,9 @@ public class MonitorView extends ClipsView implements Observer {
 	 *
 	 */
 	private void updateMap(boolean redraw) throws IOException {
+		
+		System.out.println("[PENALTIES]: "+model.getScore());
+		
 		Integer step = model.getStep();
 		Integer time = model.getTime();
 		Integer leftTime = model.getMaxDuration() - model.getTime();

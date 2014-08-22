@@ -190,6 +190,8 @@ public class MonitorModel extends ClipsModel {
             }
         }
         
+        // #### Penalità ####
+        score= new Integer(core.findOrderedFact("MAIN", "penalty"));
         
         
         DebugFrame.appendText("[SYSTEM] Aggiornato lo stato del mondo.");
