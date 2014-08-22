@@ -29,7 +29,7 @@
 (event (step 12) (type request) (source T4) (food 0) (drink 2)) 
 
 (personmove (step 2) (ident C1) (path-id P1))
-(personmove (step 3) (ident C2) (path-id P2))
+(personmove (step 4) (ident C2) (path-id P2))
 (personmove (step 1) (ident C3) (path-id P3))
 
 
