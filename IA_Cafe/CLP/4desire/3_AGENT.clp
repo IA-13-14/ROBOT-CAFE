@@ -662,6 +662,7 @@
     ?bdis <- (BDistatus BDI-EXEC-check-intention)
     (status (step ?i) (time ?t))
     (not (plan-action))
+    (not (next-id ?))
     ?intention <- (intention (type load) (table ?tab) (food ?food) (drink ?drink) (order ?ord) (desire ?des-t) (desire-id ?id))
     ?desire <- (desire (time ?des-t) (id ?id))
     =>
