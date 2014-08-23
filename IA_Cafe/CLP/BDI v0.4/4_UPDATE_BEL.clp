@@ -21,7 +21,7 @@
     (declare (salience 100))
     (not (UPDATE-BEL__init))
     (status (step ?s) (time ?t)) 
-    (K-agent (step ?o-s)
+    (K-agent (step =(- ?s 1))
                 (time ?o-t)
                 (pos-r ?o-r) 
             	(pos-c ?o-c) 
