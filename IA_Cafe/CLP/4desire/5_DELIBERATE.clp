@@ -135,8 +135,8 @@
             (id ?d-id)
     )
     (not (desire (type load) (step ?d-s2&:(< ?d-s2 ?d-s))))
-    ;Check if order can be served = table clean
-    (K-table (step ?s) (table ?d-table) (state Clean))
+    ;Check if order can be served = table not dirty
+    (K-table (step ?s) (table ?d-table) (state ~Dirty))
     ?f <- (intentions_changed (changed ?))
     =>
         (assert (printGUI (time ?t) (step ?s) (source "AGENT::DELIBERATE") (verbosity 2) (text  "Selected intention (Time:%p1,Type:%p2,T:%p3)") (param1 ?d-t) (param2 load) (param3 ?d-table)))        
@@ -174,6 +174,8 @@
             (id ?d-id)
     )
     (not (intention (desire ?d-t) (desire-id ?d-id)))
+    ;Check if order can be served = table not dirty
+    (K-table (step ?s) (table ?d-table) (state ~Dirty))
     =>
     	(assert (printGUI (time ?t) (step ?s) (source "AGENT::DELIBERATE") (verbosity 2) (text  "Added intention (Time:%p1,Type:%p2,T:%p3)") (param1 ?d-t) (param2 load) (param3 ?d-table)))        
         (assert (intention  (step ?d-s)
