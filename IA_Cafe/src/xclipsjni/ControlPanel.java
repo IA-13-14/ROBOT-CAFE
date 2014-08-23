@@ -33,6 +33,34 @@ public class ControlPanel extends javax.swing.JFrame implements Observer {
 	PropertyMonitor factsMonitor;
 	PropertyMonitor debugMonitor;
 
+	static int lastCLPSelected=-1;
+	static int lastENVSelected=-1;
+	
+	// Variables declaration - do not modify//GEN-BEGIN:variables
+	private javax.swing.JComboBox CLPSelector;
+	private javax.swing.JPanel controlPanel;
+	private javax.swing.JLabel envLabel;
+	private javax.swing.JLabel envLabel1;
+	private javax.swing.JLabel envLabel2;
+	private javax.swing.JComboBox envsSelector;
+	private javax.swing.JSeparator jSeparator1;
+	private javax.swing.JButton loadDefaultFileButton;
+	private javax.swing.JButton resetButton;
+	private javax.swing.JButton runButton;
+	private javax.swing.JButton runOneButton;
+	private javax.swing.JButton stepButton;
+	private javax.swing.JTextField stepTextField;
+	private javax.swing.JLabel strategyLabel;
+	private javax.swing.JLabel strategyLabel1;
+	private javax.swing.JTextField timeLeftTextField;
+	private javax.swing.JTextField timeTextField;
+	private javax.swing.JCheckBox visualizeAgendaButton;
+	private javax.swing.JCheckBox visualizeDebugButton;
+	private javax.swing.JCheckBox visualizeFactsButton;
+	private javax.swing.JCheckBox stepGoButton;
+
+	// End of variables declaration//GEN-END:variables
+	
 	/**
 	 * Creates new form ControlPanel
 	 */
@@ -228,6 +256,10 @@ public class ControlPanel extends javax.swing.JFrame implements Observer {
 		envLabel.setText("Select Environment:");
 
 		envsSelector.setModel(loadEnvsFolderNames());
+		//Restore previous selected if available		
+		if(lastENVSelected!=-1) {
+			envsSelector.setSelectedIndex(lastENVSelected);
+		}
 		envsSelector.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				envsSelectorActionPerformed(evt);
@@ -240,6 +272,11 @@ public class ControlPanel extends javax.swing.JFrame implements Observer {
 				CLPSelectorItemStateChanged(evt);
 			}
 		});
+		//Restore previous selected if available		
+		if(lastCLPSelected!=-1) {
+			CLPSelector.setSelectedIndex(lastCLPSelected);
+		}
+		
 		CLPSelector.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				CLPSelectorActionPerformed(evt);
@@ -827,10 +864,12 @@ public class ControlPanel extends javax.swing.JFrame implements Observer {
 
 	private void CLPSelectorActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_CLPSelectorActionPerformed
 		// TODO add your handling code here:
+		lastCLPSelected=CLPSelector.getSelectedIndex();
 	}// GEN-LAST:event_CLPSelectorActionPerformed
 
 	private void envsSelectorActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_envsSelectorActionPerformed
 		// TODO add your handling code here:
+		lastENVSelected=envsSelector.getSelectedIndex();
 	}// GEN-LAST:event_envsSelectorActionPerformed
 
 	private void CLPSelectorItemStateChanged(java.awt.event.ItemEvent evt) {// GEN-FIRST:event_CLPSelectorItemStateChanged
@@ -885,30 +924,7 @@ public class ControlPanel extends javax.swing.JFrame implements Observer {
 	// });
 	// }
 
-	// Variables declaration - do not modify//GEN-BEGIN:variables
-	private javax.swing.JComboBox CLPSelector;
-	private javax.swing.JPanel controlPanel;
-	private javax.swing.JLabel envLabel;
-	private javax.swing.JLabel envLabel1;
-	private javax.swing.JLabel envLabel2;
-	private javax.swing.JComboBox envsSelector;
-	private javax.swing.JSeparator jSeparator1;
-	private javax.swing.JButton loadDefaultFileButton;
-	private javax.swing.JButton resetButton;
-	private javax.swing.JButton runButton;
-	private javax.swing.JButton runOneButton;
-	private javax.swing.JButton stepButton;
-	private javax.swing.JTextField stepTextField;
-	private javax.swing.JLabel strategyLabel;
-	private javax.swing.JLabel strategyLabel1;
-	private javax.swing.JTextField timeLeftTextField;
-	private javax.swing.JTextField timeTextField;
-	private javax.swing.JCheckBox visualizeAgendaButton;
-	private javax.swing.JCheckBox visualizeDebugButton;
-	private javax.swing.JCheckBox visualizeFactsButton;
-	private javax.swing.JCheckBox stepGoButton;
 
-	// End of variables declaration//GEN-END:variables
 
 	public JTextField getStepTextField() {
 		return stepTextField;
