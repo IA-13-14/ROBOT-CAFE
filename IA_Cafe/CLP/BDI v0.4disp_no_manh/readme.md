@@ -1,7 +1,9 @@
-BDI v0.4disp
+BDI v0.4disp_no_manh
 --------
 
 Test di pianificazione con piano statico adattivo ai parametri dell'ordine
 
 CHANGELOG:
-	Aggiunta dell'ottimizzazione per la scelta dei distributori a metà strada tra Pos e Table.
+	Come la precedente(BDIv0.4disp) ma con pre-computed path cost
+	Aggiunta la scelta di DD più vicino a FD.
+	Aggiunto pre-caricamento dei PCPC da file.

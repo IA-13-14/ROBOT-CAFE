@@ -18,7 +18,7 @@
     =>
         (assert (DELIBERATE__init)) 
         (assert (DELIBERATE__runonce))
-        (assert (printGUI (time ?t) (step ?s) (source "AGENT::DELIBERATE") (verbosity 2) (text  "DELIBERATE Module invoked")))
+        ;(assert (printGUI (time ?t) (step ?s) (source "AGENT::DELIBERATE") (verbosity 2) (text  "DELIBERATE Module invoked")))
 )
 
 ;runonce section

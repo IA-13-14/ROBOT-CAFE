@@ -18,7 +18,7 @@
     =>
         (assert (ACTIONS-PLANNER__init)) 
         (assert (runonce))
-        (assert (printGUI (time ?t) (step ?s) (source "AGENT::ACTIONS-PLANNER") (verbosity 2) (text  "ACTIONS-PLANNER Module invoked")))
+        ;(assert (printGUI (time ?t) (step ?s) (source "AGENT::ACTIONS-PLANNER") (verbosity 2) (text  "ACTIONS-PLANNER Module invoked")))
         (assert (actions-seq 0))
 )
 

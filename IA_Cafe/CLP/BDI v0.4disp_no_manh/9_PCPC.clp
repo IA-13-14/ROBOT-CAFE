@@ -41,7 +41,7 @@
                     (dest-direction ?dst-d) (dest-r ?dst-r) (dest-c ?dst-c))
     (status (time ?t) (step ?s))
     =>
-        ;(assert (printGUI (time ?t) (step ?s) (source "AGENT::PCPC") (verbosity 2) (text  "Calculating PCPC from (%p1,%p2-%p3) to (%p4,%p5)") (param1 ?src-r) (param2 ?src-c) (param3 ?src-d) (param4 ?dst-r) (param5 ?dst-c)))
+        (assert (printGUI (time ?t) (step ?s) (source "AGENT::PCPC") (verbosity 2) (text  "Calculating PCPC")))
         ;calcolo percorso con PATH_PLANNER
         ;#### TODO: usare direzione reale, se ne vale la pena ! ###
         (assert (start-path-planning (source-direction ?src-d) (source-r ?src-r) (source-c ?src-c)

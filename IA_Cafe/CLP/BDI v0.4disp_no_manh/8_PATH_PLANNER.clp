@@ -21,7 +21,7 @@
     =>
         (assert (PATH-PLANNER__init)) 
         (assert (PATH-PLANNER__runonce))
-        (assert (printGUI (time ?t) (step ?s) (source "AGENT::PATH-PLANNER") (verbosity 2) (text  "PATH-PLANNER Module invoked")))
+        ;(assert (printGUI (time ?t) (step ?s) (source "AGENT::PATH-PLANNER") (verbosity 2) (text  "PATH-PLANNER Module invoked")))
 )
 
 ;UPDATE-BEL:runonce section
@@ -84,7 +84,7 @@
     ;Inizializza goal
     (assert (goal (direction ?d-dir) (pos-r ?d-r) (pos-c ?d-c)))
 
-    (assert (printGUI (time ?t) (step ?s) (source "AGENT::PATH-PLANNER") (verbosity 2) (text  "Searching path from (%p1,%p2-%p3) to (%p4,%p5-%p6)") (param1 ?s-r) (param2 ?s-c) (param3 ?s-dir) (param4 ?d-r) (param5 ?d-c) (param6 ?d-dir)))
+    ;(assert (printGUI (time ?t) (step ?s) (source "AGENT::PATH-PLANNER") (verbosity 2) (text  "Searching path from (%p1,%p2-%p3) to (%p4,%p5-%p6)") (param1 ?s-r) (param2 ?s-c) (param3 ?s-dir) (param4 ?d-r) (param5 ?d-c) (param6 ?d-dir)))
 )
 
 ;Controllo arrivato al goal
@@ -96,7 +96,7 @@
     
     =>
    ;(halt); for debug purpose
-    (printout t "(HALTED FOR DEBUG) Esiste soluzione per goal (" ?r "," ?c ") con costo "  ?g crlf)
+    ;(printout t "(HALTED FOR DEBUG) Esiste soluzione per goal (" ?r "," ?c ") con costo "  ?g crlf)
     (assert (stampa ?id 0 -1))
     (assert (path-planning-result (success yes) (cost ?g)))
 )
@@ -110,7 +110,7 @@
     
     =>
     ;(halt); for debug purpose
-    (printout t "(HALTED FOR DEBUG) Esiste soluzione per goal (" ?r "," ?c ") con costo "  ?g crlf)
+    ;(printout t "(HALTED FOR DEBUG) Esiste soluzione per goal (" ?r "," ?c ") con costo "  ?g crlf)
     (assert (stampa ?id 0 -1))
     (assert (path-planning-result (success yes) (cost ?g)))
 )
@@ -121,7 +121,7 @@
 ?f<-(stampa ?id ?seq ?rev)
     (node (ident ?id) (father ?anc&~NA))  
     (pp-exec ?anc ?id ?oper ?r ?c)
-=> (printout t " " ?seq ") Eseguo azione " ?oper " da stato (" ?r "," ?c ") " crlf)
+=> ;(printout t " " ?seq ") Eseguo azione " ?oper " da stato (" ?r "," ?c ") " crlf)
    (assert (path-planning-action (sequence ?rev) (operator ?oper)))
    (assert (stampa ?anc (+ 1 ?seq) (- ?rev 1)))
    (retract ?f)
@@ -147,10 +147,10 @@
        (open-better ?better)
        (alreadyclosed ?closed)
        (numberofnodes ?n )  
-=> (printout t " stati espansi " ?n crlf)
-   (printout t " stati generati gi� in closed " ?closed crlf)
-   (printout t " stati generati gi� in open (open-worse) " ?worse crlf)
-   (printout t " stati generati gi� in open (open-better) " ?better crlf)
+=> ;(printout t " stati espansi " ?n crlf)
+   ;(printout t " stati generati gi� in closed " ?closed crlf)
+   ;(printout t " stati generati gi� in open (open-worse) " ?worse crlf)
+   ;(printout t " stati generati gi� in open (open-better) " ?better crlf)
    (assert (ppclean))
    (retract ?f)
 ;   (pop-focus)

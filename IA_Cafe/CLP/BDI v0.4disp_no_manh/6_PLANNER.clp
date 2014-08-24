@@ -12,15 +12,16 @@
 
 ;WARNING: Deftemplates used by AGENT must be defined in AGENT Module !
 
-(deftemplate pcpc
-    (slot source-direction (allowed-values north south east west))
-    (slot source-r)
-    (slot source-c)
-    (slot dest-direction (allowed-values north south east west any))
-    (slot dest-r)
-    (slot dest-c)   
-    (slot cost) 
-)
+;MOVED TO MAIN for laoding purpose
+;(deftemplate pcpc
+;    (slot source-direction (allowed-values north south east west))
+;    (slot source-r)
+;    (slot source-c)
+;    (slot dest-direction (allowed-values north south east west any))
+;    (slot dest-r)
+;    (slot dest-c)   
+;    (slot cost) 
+;)
 
 (deftemplate planning
     (slot type (allowed-values order cleantable))
@@ -42,7 +43,7 @@
         (assert (PLANNER__init)) 
         (assert (PLANNER__runonce))
         (assert (PLANNER__planonce))
-        (assert (printGUI (time ?t) (step ?s) (source "AGENT::PLANNER") (verbosity 2) (text  "PLANNER Module invoked")))
+        ;(assert (printGUI (time ?t) (step ?s) (source "AGENT::PLANNER") (verbosity 2) (text  "PLANNER Module invoked")))
         ;(halt)
 )
 
@@ -161,7 +162,7 @@
     ;PCPC from Pos to FD not calculated yet    
     ?vpos <- (var agentPos ?ag-r ?ag-c)
     (access-cell (object FD) (obj-r ?fd-r) (obj-c ?fd-c) (pos-r ?fdac-r) (pos-c ?fdac-c))
-    (not (pcpc (source-r ?ag-r) (source-c ?ag-c) (dest-r ?fd-r) (dest-c ?fd-c)))
+    (not (pcpc (source-r ?ag-r) (source-c ?ag-c) (dest-r ?fdac-r) (dest-c ?fdac-c)))
     =>
         ;calculate PCPC
         ;#### TODO: usare direzione reale, se ne vale la pena ! ###
@@ -228,12 +229,8 @@
             )
         )
     =>
-        ;Goto FD
-        (assert (plan-action (seq ?pseq) (action Goto) (param1 ?fdac-r) (param2 ?fdac-c)))
-        (retract ?vpos)
-        (assert (var agentPos ?fdac-r ?fdac-c))
-        ;Load Food (min needed and possible qty)
-        (assert (plan-action (seq (+ 1 ?pseq)) (action LoadFood) (param1 ?fd-r) (param2 ?fd-c) (param3 (min ?slots (- ?food ?lf)))))
+        ;Goto FD (temp var to check if FD is closer than DD)
+        (assert (var load-food-check ?pos-fd ?fd-r ?fd-c ?fdac-r ?fdac-c (min ?slots (- ?food ?lf))))        
         ;update vars
         (retract ?vslots)
         (assert (var freeSlots (- ?slots (min ?slots (- ?food ?lf)))))
@@ -241,7 +238,8 @@
         (assert (var loadedFood (+ ?lf (min ?slots (- ?food ?lf)))))
         (retract ?vfb)
         (assert (var foodOnBoard (min ?slots (- ?food ?lf))))
-        (modify ?pln (step 3) (pseq (+ 2 ?pseq)))
+        (modify ?pln (step 3))
+        ;(halt)
 )
 
 ;Planning for serve order - If B - False
@@ -251,6 +249,7 @@
     ?pln <- (planning (type order) (step 2) (pseq ?pseq) (param1 ?ordid) (param2 ?tab) (param3 ?food) (param4 ?drink))
     =>
         (modify ?pln (step 3))
+        ;(halt)
 )
 
 ;Planning for serve order - If C - True
@@ -266,7 +265,7 @@
     ;PCPC from Pos to DD not calculated yet    
     ?vpos <- (var agentPos ?ag-r ?ag-c)
     (access-cell (object DD) (obj-r ?fd-r) (obj-c ?fd-c) (pos-r ?fdac-r) (pos-c ?fdac-c))
-    (not (pcpc (source-r ?ag-r) (source-c ?ag-c) (dest-r ?fd-r) (dest-c ?fd-c)))
+    (not (pcpc (source-r ?ag-r) (source-c ?ag-c) (dest-r ?fdac-r) (dest-c ?fdac-c)))
     =>
         ;calculate PCPC
         ;#### TODO: usare direzione reale, se ne vale la pena ! ###
@@ -332,12 +331,8 @@
                 )
             )
         )=>
-        ;Goto DD
-        (assert (plan-action (seq ?pseq) (action Goto) (param1 ?fdac-r) (param2 ?fdac-c)))
-        (retract ?vpos)
-        (assert (var agentPos ?fdac-r ?fdac-c))
-        ;Load Drink (min needed and possible qty)
-        (assert (plan-action (seq (+ 1 ?pseq)) (action LoadDrink) (param1 ?fd-r) (param2 ?fd-c) (param3 (min ?slots (- ?drink ?ld)))))
+        ;Goto DD (temp var to check if FD is closer than DD)
+        (assert (var load-drink-check ?pos-fd ?fd-r ?fd-c ?fdac-r ?fdac-c (min ?slots (- ?drink ?ld))))   
         ;update vars
         (retract ?vslots)
         (assert (var freeSlots (- ?slots (min ?slots (- ?drink ?ld)))))
@@ -345,7 +340,8 @@
         (assert (var loadedDrink (+ ?ld (min ?slots (- ?drink ?ld)))))
         (retract ?vdb)
         (assert (var drinkOnBoard (min ?slots (- ?drink ?ld))))
-        (modify ?pln (step 4) (pseq (+ 2 ?pseq)))
+        (modify ?pln (step 4))
+        ;(halt)
 )
 
 ;Planning for serve order - If C - False
@@ -355,13 +351,102 @@
     ?pln <- (planning (type order) (step 3) (pseq ?pseq) (param1 ?ordid) (param2 ?tab) (param3 ?food) (param4 ?drink))
     =>
         (modify ?pln (step 4))
+        ;(halt)
+)
+
+;Choose to go first to FD or DD: first to FD, than DD
+(defrule serve-order-check-FD-closer-than-DD
+    (declare (salience 96))    
+    ?pln <- (planning (type order) (step 4) (pseq ?pseq))
+    ?vpos <- (var agentPos ?ag-r ?ag-c)
+    ?lfc <- (var load-food-check ?pos-fd ?fd-r ?fd-c ?fdac-r ?fdac-c ?f-qty)
+    ?ldc <- (var load-drink-check ?pos-dd ?dd-r ?dd-c ?ddac-r ?ddac-c ?d-qty)
+    (test (<= ?pos-fd ?pos-dd))
+    =>
+        (retract ?lfc)
+        (retract ?ldc)
+        ;Goto FD           
+        (assert (plan-action (seq ?pseq) (action Goto) (param1 ?fdac-r) (param2 ?fdac-c)))
+        ;Load Food
+        (assert (plan-action (seq (+ 1 ?pseq)) (action LoadFood) (param1 ?fd-r) (param2 ?fd-c) (param3 ?f-qty)))       
+        ;Goto DD           
+        (assert (plan-action (seq (+ 2 ?pseq)) (action Goto) (param1 ?ddac-r) (param2 ?ddac-c)))
+        ;Load Drink
+        (assert (plan-action (seq (+ 3 ?pseq)) (action LoadDrink) (param1 ?dd-r) (param2 ?dd-c) (param3 ?d-qty)))       
+        ;update vars
+        (retract ?vpos)
+        (assert (var agentPos ?ddac-r ?ddac-c))
+        (modify ?pln (step 4-bis) (pseq (+ 4 ?pseq)))
+)
+
+;Choose to go first to FD or DD: first to DD, than FD
+(defrule serve-order-check-DD-closer-than-FD
+    (declare (salience 96))    
+    ?pln <- (planning (type order) (step 4) (pseq ?pseq))
+    ?vpos <- (var agentPos ?ag-r ?ag-c)
+    ?lfc <- (var load-food-check ?pos-fd ?fd-r ?fd-c ?fdac-r ?fdac-c ?f-qty)
+    ?ldc <- (var load-drink-check ?pos-dd ?dd-r ?dd-c ?ddac-r ?ddac-c ?d-qty)
+    (test (<= ?pos-dd ?pos-fd))
+    =>   
+        (retract ?lfc)
+        (retract ?ldc)
+        ;Goto DD           
+        (assert (plan-action (seq ?pseq) (action Goto) (param1 ?ddac-r) (param2 ?ddac-c)))
+        ;Load Drink
+        (assert (plan-action (seq (+ 1 ?pseq)) (action LoadDrink) (param1 ?dd-r) (param2 ?dd-c) (param3 ?d-qty)))       
+        ;Goto FD           
+        (assert (plan-action (seq (+ 2 ?pseq)) (action Goto) (param1 ?fdac-r) (param2 ?fdac-c)))
+        ;Load Food
+        (assert (plan-action (seq (+ 3 ?pseq)) (action LoadFood) (param1 ?fd-r) (param2 ?fd-c) (param3 ?f-qty)))
+        ;update vars
+        (retract ?vpos)
+        (assert (var agentPos ?fdac-r ?fdac-c))
+        (modify ?pln (step 4-bis) (pseq (+ 4 ?pseq)))
+)
+
+;Choose to go first to FD or DD: FD only
+(defrule serve-order-check-FD-only
+    (declare (salience 95))    
+    ?pln <- (planning (type order) (step 4) (pseq ?pseq))
+    ?vpos <- (var agentPos ?ag-r ?ag-c)
+    ?lfc <- (var load-food-check ?pos-fd ?fd-r ?fd-c ?fdac-r ?fdac-c ?f-qty)
+    (not (var load-drink-check $?))
+    =>       
+        (retract ?lfc)
+        ;Goto FD           
+        (assert (plan-action (seq ?pseq) (action Goto) (param1 ?fdac-r) (param2 ?fdac-c)))
+        ;Load Food
+        (assert (plan-action (seq (+ 1 ?pseq)) (action LoadFood) (param1 ?fd-r) (param2 ?fd-c) (param3 ?f-qty)))     
+        ;update vars
+        (retract ?vpos)
+        (assert (var agentPos ?fdac-r ?fdac-c))
+        (modify ?pln (step 4-bis) (pseq (+ 2 ?pseq)))
+)
+
+;Choose to go first to FD or DD: DD only
+(defrule serve-order-check-DD-only
+    (declare (salience 95))    
+    ?pln <- (planning (type order) (step 4) (pseq ?pseq))
+    ?vpos <- (var agentPos ?ag-r ?ag-c)
+    ?lfc <- (var load-drink-check ?pos-dd ?dd-r ?dd-c ?ddac-r ?ddac-c ?d-qty)
+    (not (var load-food-check $?))
+    =>       
+        (retract ?lfc)
+        ;Goto DD           
+        (assert (plan-action (seq ?pseq) (action Goto) (param1 ?ddac-r) (param2 ?ddac-c)))
+        ;Load Drink
+        (assert (plan-action (seq (+ 1 ?pseq)) (action LoadDrink) (param1 ?dd-r) (param2 ?dd-c) (param3 ?d-qty))) 
+        ;update vars
+        (retract ?vpos)
+        (assert (var agentPos ?ddac-r ?ddac-c))
+        (modify ?pln (step 4-bis) (pseq (+ 2 ?pseq)))
 )
 
 ;Planning for serve order - goto Table
 (defrule serve-order-goto-table
     (declare (salience 95))
     ?f <- (PLANNER__runonce)
-    ?pln <- (planning (type order) (step 4) (pseq ?pseq) (param1 ?ordid) (param2 ?tab) (param3 ?food) (param4 ?drink))
+    ?pln <- (planning (type order) (step 4-bis) (pseq ?pseq) (param1 ?ordid) (param2 ?tab) (param3 ?food) (param4 ?drink))
     (var tablepos ?tabr ?tabc)
     ;Table Best position
     ?vpos <- (var agentPos ?ag-r ?ag-c)
@@ -481,7 +566,7 @@
     ;PCPC from Pos to TB not calculated yet 
     (var agentPos ?ag-r ?ag-c)  
     (access-cell (object TB) (obj-r ?fd-r) (obj-c ?fd-c) (pos-r ?fdac-r) (pos-c ?fdac-c))
-    (not (pcpc (source-r ?ag-r) (source-c ?ag-c) (dest-r ?fd-r) (dest-c ?fd-c)))
+    (not (pcpc (source-r ?ag-r) (source-c ?ag-c) (dest-r ?fdac-r) (dest-c ?fdac-c)))
     =>
         ;calculate PCPC
         ;#### TODO: usare direzione reale, se ne vale la pena ! ###
@@ -528,7 +613,7 @@
     ;PCPC from Pos to RB not calculated yet 
     (var agentPos ?ag-r ?ag-c)  
     (access-cell (object RB) (obj-r ?fd-r) (obj-c ?fd-c) (pos-r ?fdac-r) (pos-c ?fdac-c))
-    (not (pcpc (source-r ?ag-r) (source-c ?ag-c) (dest-r ?fd-r) (dest-c ?fd-c)))
+    (not (pcpc (source-r ?ag-r) (source-c ?ag-c) (dest-r ?fdac-r) (dest-c ?fdac-c)))
     =>
         ;calculate PCPC
         ;#### TODO: usare direzione reale, se ne vale la pena ! ###

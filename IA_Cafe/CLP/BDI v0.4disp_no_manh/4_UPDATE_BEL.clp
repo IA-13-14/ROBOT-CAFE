@@ -36,7 +36,7 @@
         (assert (UPDATE-BEL__init)) 
         (assert (UPDATE-BEL__runonce))
         (assert (UPDATE-BEL__exec-history-runonce))
-        (assert (printGUI (time ?t) (step ?s) (source "AGENT::UPDATE-BEL") (verbosity 2) (text  "UPDATE-BEL Module invoked")))
+        ;(assert (printGUI (time ?t) (step ?s) (source "AGENT::UPDATE-BEL") (verbosity 2) (text  "UPDATE-BEL Module invoked")))
         (assert (K-agent (step ?s)
                     (time ?t) 
                     (pos-r ?o-r) 
@@ -57,7 +57,7 @@
         (assert (UPDATE-BEL__init)) 
         (assert (UPDATE-BEL__runonce))
         (assert (UPDATE-BEL__exec-history-runonce))
-        (assert (printGUI (time ?t) (step ?s) (source "AGENT::UPDATE-BEL") (verbosity 2) (text  "UPDATE-BEL Module invoked")))
+        ;(assert (printGUI (time ?t) (step ?s) (source "AGENT::UPDATE-BEL") (verbosity 2) (text  "UPDATE-BEL Module invoked")))
 )
 
 ;Regola per rimuovere le vecchie percezioni, ormai obsolete
