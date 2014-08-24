@@ -12,16 +12,13 @@
 
 ;WARNING: Deftemplates used by AGENT must be defined in AGENT Module !
 
-;MOVED TO MAIN for laoding purpose
-;(deftemplate pcpc
-;    (slot source-direction (allowed-values north south east west))
-;    (slot source-r)
-;    (slot source-c)
-;    (slot dest-direction (allowed-values north south east west any))
-;    (slot dest-r)
-;    (slot dest-c)   
-;    (slot cost) 
-;)
+(deftemplate pcpc
+    (slot source-r)
+    (slot source-c)
+    (slot dest-r)
+    (slot dest-c)   
+    (slot cost) 
+)
 
 (deftemplate planning
     (slot type (allowed-values order cleantable))
