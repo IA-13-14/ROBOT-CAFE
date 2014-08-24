@@ -153,10 +153,8 @@
 
 ;#### MODULE PCPC Templates ####
 (deftemplate calculate-pcpc
-    (slot source-direction (allowed-values north south east west))
     (slot source-r)
     (slot source-c)
-    (slot dest-direction (allowed-values north south east west any))
     (slot dest-r)
     (slot dest-c)     
 )

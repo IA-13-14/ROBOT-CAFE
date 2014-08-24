@@ -13,10 +13,8 @@
 ;WARNING: Deftemplates used by AGENT must be defined in AGENT Module !
 
 (deftemplate pcpc
-    (slot source-direction (allowed-values north south east west))
     (slot source-r)
     (slot source-c)
-    (slot dest-direction (allowed-values north south east west any))
     (slot dest-r)
     (slot dest-c)   
     (slot cost) 
@@ -164,9 +162,8 @@
     (not (pcpc (source-r ?ag-r) (source-c ?ag-c) (dest-r ?fd-r) (dest-c ?fd-c)))
     =>
         ;calculate PCPC
-        ;#### TODO: usare direzione reale, se ne vale la pena ! ###
-        (assert (calculate-pcpc (source-direction south) (source-r ?ag-r) (source-c ?ag-c)
-                                 (dest-direction any) (dest-r ?fdac-r) (dest-c ?fdac-c)))
+        (assert (calculate-pcpc (source-r ?ag-r) (source-c ?ag-c)
+                                 (dest-r ?fdac-r) (dest-c ?fdac-c)))
         (focus PCPC)
 )
 
@@ -188,9 +185,8 @@
     (not (pcpc (source-r ?fdac-r) (source-c ?fdac-c) (dest-r ?tbac-r) (dest-c ?tbac-c)))
     =>
         ;calculate PCPC
-        ;#### TODO: usare direzione reale, se ne vale la pena ! ###
-        (assert (calculate-pcpc (source-direction south) (source-r ?fdac-r) (source-c ?fdac-c)
-                                 (dest-direction any) (dest-r ?tbac-r) (dest-c ?tbac-c)))
+        (assert (calculate-pcpc (source-r ?fdac-r) (source-c ?fdac-c)
+                                 (dest-r ?tbac-r) (dest-c ?tbac-c)))
         (focus PCPC)
 )
 
@@ -269,9 +265,8 @@
     (not (pcpc (source-r ?ag-r) (source-c ?ag-c) (dest-r ?fd-r) (dest-c ?fd-c)))
     =>
         ;calculate PCPC
-        ;#### TODO: usare direzione reale, se ne vale la pena ! ###
-        (assert (calculate-pcpc (source-direction south) (source-r ?ag-r) (source-c ?ag-c)
-                                 (dest-direction any) (dest-r ?fdac-r) (dest-c ?fdac-c)))
+        (assert (calculate-pcpc (source-r ?ag-r) (source-c ?ag-c)
+                                 (dest-r ?fdac-r) (dest-c ?fdac-c)))
         (focus PCPC)
 )
 
@@ -293,9 +288,8 @@
     (not (pcpc (source-r ?fdac-r) (source-c ?fdac-c) (dest-r ?tbac-r) (dest-c ?tbac-c)))
     =>
         ;calculate PCPC
-        ;#### TODO: usare direzione reale, se ne vale la pena ! ###
-        (assert (calculate-pcpc (source-direction south) (source-r ?fdac-r) (source-c ?fdac-c)
-                                 (dest-direction any) (dest-r ?tbac-r) (dest-c ?tbac-c)))
+        (assert (calculate-pcpc (source-r ?fdac-r) (source-c ?fdac-c)
+                                 (dest-r ?tbac-r) (dest-c ?tbac-c)))
         (focus PCPC)
 )
 
@@ -484,9 +478,8 @@
     (not (pcpc (source-r ?ag-r) (source-c ?ag-c) (dest-r ?fd-r) (dest-c ?fd-c)))
     =>
         ;calculate PCPC
-        ;#### TODO: usare direzione reale, se ne vale la pena ! ###
-        (assert (calculate-pcpc (source-direction south) (source-r ?ag-r) (source-c ?ag-c)
-                                 (dest-direction any) (dest-r ?fdac-r) (dest-c ?fdac-c)))
+        (assert (calculate-pcpc (source-r ?ag-r) (source-c ?ag-c)
+                                 (dest-r ?fdac-r) (dest-c ?fdac-c)))
         (focus PCPC)
 )
 
@@ -531,9 +524,8 @@
     (not (pcpc (source-r ?ag-r) (source-c ?ag-c) (dest-r ?fd-r) (dest-c ?fd-c)))
     =>
         ;calculate PCPC
-        ;#### TODO: usare direzione reale, se ne vale la pena ! ###
-        (assert (calculate-pcpc (source-direction south) (source-r ?ag-r) (source-c ?ag-c)
-                                 (dest-direction any) (dest-r ?fdac-r) (dest-c ?fdac-c)))
+        (assert (calculate-pcpc (source-r ?ag-r) (source-c ?ag-c)
+                                 (dest-r ?fdac-r) (dest-c ?fdac-c)))
         (focus PCPC)
 )
 
