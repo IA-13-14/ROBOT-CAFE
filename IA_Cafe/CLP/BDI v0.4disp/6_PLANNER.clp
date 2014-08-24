@@ -361,13 +361,60 @@
 		(modify ?pln (step unload))
 )
 
-(defrule clean-table-unload-food
+(defrule clean-table-unload-food-first
 	(declare (salience 30))
 	?pln <- (planning (type cleantable) (step unload) (pseq ?seq) (param1 ?tab))
 	?vtu <- (var to-unload food)
 	?vdest <- (var destination food ?r ?c ?tb-r ?tb-c)
 	?vdist <- (var distance food ?dist-f)
-	(or (not (var to-unload drink)) (var distance drink ?dist-d&:(> ?dist-d ?dist-f))) ;no drink to unload or RB is farther than TB
+	(var to-unload drink)
+	(var distance drink ?dist-d&:(> ?dist-d ?dist-f)) ;RB is farther than TB
+	?vpos <- (var agentPos ?ag-r ?ag-c)
+	?vdest-d <- (var destination drink $?)
+	;RB Best position
+    (access-cell (object RB) (obj-r ?rb-r) (obj-c ?rb-c) (pos-r ?r-d) (pos-c ?c-d))
+    (not (access-cell (object RB) (pos-r ?r1) (pos-c ?c1&:(> (manh-cost ?r ?c ?r-d ?c-d) (manh-cost ?r ?c ?r1 ?c1)))))
+	=>
+		(assert (plan-action (seq ?seq) (action Goto) (param1 ?r) (param2 ?c)))
+		(retract ?vpos)
+		(assert (var agentPos ?r ?c))
+		(retract ?vdest-d)
+		(assert (var destination drink ?r-d ?c-d ?rb-r ?rb-c))
+		(assert (plan-action (seq (+ ?seq 1)) (action EmptyFood) (param1 ?tb-r) (param2 ?tb-c)))
+		(retract ?vtu)
+		(retract ?vdest)
+		(retract ?vdist)
+		(modify ?pln (pseq (+ ?seq 2)))
+)
+
+(defrule clean-table-unload-drink-first
+	(declare (salience 29))
+	?pln <- (planning (type cleantable) (step unload) (pseq ?seq) (param1 ?tab))
+	?vtu <- (var to-unload drink)
+	?vdest <- (var destination drink ?r ?c ?rb-r ?rb-c)
+	?vdist <- (var distance drink ?dist-d)
+	?vpos <- (var agentPos ?ag-r ?ag-c)
+	?vdest-f <- (var destination food $?)
+	;TB Best position
+    (access-cell (object TB) (obj-r ?rb-r) (obj-c ?rb-c) (pos-r ?r-f) (pos-c ?c-f))
+    (not (access-cell (object TB) (pos-r ?r1) (pos-c ?c1&:(> (manh-cost ?r ?c ?r-f ?c-f) (manh-cost ?r ?c ?r1 ?c1)))))
+	=>
+		(assert (plan-action (seq ?seq) (action Goto) (param1 ?r) (param2 ?c)))
+		(retract ?vpos)
+		(assert (var agentPos ?r ?c))
+		(assert (plan-action (seq (+ ?seq 1)) (action EmptyDrink) (param1 ?rb-r) (param2 ?rb-c)))
+		(retract ?vtu)
+		(retract ?vdest)
+		(retract ?vdist)
+		(modify ?pln (pseq (+ ?seq 2)))
+)
+
+(defrule clean-table-unload-food
+	(declare (salience 25))
+	?pln <- (planning (type cleantable) (step unload) (pseq ?seq))
+	?vtu <- (var to-unload food)
+	?vdest <- (var destination food ?r ?c ?tb-r ?tb-c)
+	?vdist <- (var distance food ?dist-f)
 	?vpos <- (var agentPos ?ag-r ?ag-c)
 	=>
 		(assert (plan-action (seq ?seq) (action Goto) (param1 ?r) (param2 ?c)))
@@ -381,8 +428,8 @@
 )
 
 (defrule clean-table-unload-drink
-	(declare (salience 29))
-	?pln <- (planning (type cleantable) (step unload) (pseq ?seq) (param1 ?tab))
+	(declare (salience 25))
+	?pln <- (planning (type cleantable) (step unload) (pseq ?seq))
 	?vtu <- (var to-unload drink)
 	?vdest <- (var destination drink ?r ?c ?rb-r ?rb-c)
 	?vdist <- (var distance drink ?dist-d)
