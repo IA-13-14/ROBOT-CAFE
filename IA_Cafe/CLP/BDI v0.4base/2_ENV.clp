@@ -1200,6 +1200,7 @@
 => 
     (modify ?f2 (step (+ ?i 1)) (time (+ ?t 5)))
     (modify ?f1 (step (+ ?i 1)) (time (+ ?t 5)))
+    (assert (printGUI (time ?t) (step ?i) (source "ENV") (verbosity 1) (text  "Penalty 500000 for load-food_KO2")))
         (assert (penalty (+ ?p  500000)))
         (retract ?f5)
 )
@@ -1216,6 +1217,7 @@
 => 
     (modify ?f2 (step (+ ?i 1)) (time (+ ?t 5)))
     (modify ?f1 (step (+ ?i 1)) (time (+ ?t 5)))
+    (assert (printGUI (time ?t) (step ?i) (source "ENV") (verbosity 1) (text  "Penalty 500000 for load-food_KO3")))
         (assert (penalty (+ ?p  500000)))
         (retract ?f5)
 )
@@ -1231,6 +1233,7 @@
 => 
     (modify ?f2 (step (+ ?i 1)) (time (+ ?t 5)))
     (modify ?f1 (step (+ ?i 1)) (time (+ ?t 5)))
+    (assert (printGUI (time ?t) (step ?i) (source "ENV") (verbosity 1) (text  "Penalty 500000 for load-food_KO4")))
         (assert (penalty (+ ?p  500000)))
         (retract ?f5)
 )
@@ -1285,6 +1288,7 @@
 => 
     (modify ?f2 (step (+ ?i 1)) (time (+ ?t 6)))
     (modify ?f1 (step (+ ?i 1)) (time (+ ?t 6)))
+    (assert (printGUI (time ?t) (step ?i) (source "ENV") (verbosity 1) (text  "Penalty 500000 for load-drink_KO2")))
         (assert (penalty (+ ?p  500000)))
         (retract ?f5)
 )
@@ -1301,6 +1305,7 @@
 => 
     (modify ?f2 (step (+ ?i 1)) (time (+ ?t 6)))
     (modify ?f1 (step (+ ?i 1)) (time (+ ?t 6)))
+    (assert (printGUI (time ?t) (step ?i) (source "ENV") (verbosity 1) (text  "Penalty 500000 for load-drink_KO3")))
         (assert (penalty (+ ?p  500000)))
         (retract ?f5)
 )
@@ -1316,6 +1321,7 @@
 => 
     (modify ?f2 (step (+ ?i 1)) (time (+ ?t 6)))
     (modify ?f1 (step (+ ?i 1)) (time (+ ?t 6)))
+    (assert (printGUI (time ?t) (step ?i) (source "ENV") (verbosity 1) (text  "Penalty 500000 for load-drink_KO4")))
         (assert (penalty (+ ?p  500000)))
         (retract ?f5)
 )
@@ -1779,7 +1785,8 @@
             (perc7 ?x7) (perc8 ?x8) (perc9 ?x9)
         )
     )
-    (focus MAIN)
+    ;(focus MAIN)
+    (pop-focus) ;Evita di riempire lo stack del focus 
 )
 
 (defrule percept-south
@@ -1802,7 +1809,8 @@
             (perc7 ?x7) (perc8 ?x8) (perc9 ?x9)
         )
     )
-    (focus MAIN)
+    ;(focus MAIN)
+    (pop-focus) ;Evita di riempire lo stack del focus
 )
 
 (defrule percept-east
@@ -1825,7 +1833,8 @@
             (perc7 ?x7) (perc8 ?x8) (perc9 ?x9)
         )
     )
-    (focus MAIN)
+    ;(focus MAIN)
+    (pop-focus) ;Evita di riempire lo stack del focus
 )
 
 (defrule percept-west
@@ -1848,5 +1857,6 @@
             (perc7 ?x7) (perc8 ?x8) (perc9 ?x9)
         )
     )
-    (focus MAIN)
+    ;(focus MAIN)
+    (pop-focus) ;Evita di riempire lo stack del focus
 )

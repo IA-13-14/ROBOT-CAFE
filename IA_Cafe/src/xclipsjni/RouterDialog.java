@@ -13,12 +13,14 @@ import CLIPSJNI.Router;
  */
 class RouterDialog extends Router {
 
-	private String stdout;
+	//private String stdout;
+	private StringBuffer stdoutBuff;
 	private boolean rec;
 
 	public RouterDialog(String name) {
 		super(name, 100);
-		stdout = "";
+		//stdout = "";
+		stdoutBuff=new StringBuffer();
 		rec = false;
 	}
 
@@ -41,16 +43,19 @@ class RouterDialog extends Router {
 	@Override
 	public synchronized void print(String routerName, String printString) {
 		if (rec) {
-			stdout = stdout + printString;
+			stdoutBuff.append(printString);
+			//stdout = stdout + printString;
 		}
 	}
 
 	public synchronized String getStdout() {
-		return stdout;
+		return stdoutBuff.toString();
+		//return stdout;
 	}
 
 	public synchronized void startRec() {
-		stdout = "";
+		//stdout = "";
+		stdoutBuff=new StringBuffer();
 		rec = true;
 	}
 
