@@ -15,6 +15,7 @@ import java.util.Observer;
 import javax.swing.AbstractAction;
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
@@ -33,9 +34,9 @@ public class ControlPanel extends javax.swing.JFrame implements Observer {
 	PropertyMonitor factsMonitor;
 	PropertyMonitor debugMonitor;
 
-	static int lastCLPSelected=-1;
-	static int lastENVSelected=-1;
-	
+	static int lastCLPSelected = -1;
+	static int lastENVSelected = -1;
+
 	// Variables declaration - do not modify//GEN-BEGIN:variables
 	private javax.swing.JComboBox CLPSelector;
 	private javax.swing.JPanel controlPanel;
@@ -58,9 +59,10 @@ public class ControlPanel extends javax.swing.JFrame implements Observer {
 	private javax.swing.JCheckBox visualizeDebugButton;
 	private javax.swing.JCheckBox visualizeFactsButton;
 	private javax.swing.JCheckBox stepGoButton;
+	private javax.swing.JCheckBox runAndUpdateButton;
 
 	// End of variables declaration//GEN-END:variables
-	
+
 	/**
 	 * Creates new form ControlPanel
 	 */
@@ -247,17 +249,18 @@ public class ControlPanel extends javax.swing.JFrame implements Observer {
 		envLabel1 = new javax.swing.JLabel();
 		envLabel2 = new javax.swing.JLabel();
 		jSeparator1 = new javax.swing.JSeparator();
+		runAndUpdateButton=new JCheckBox();
 
 		setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-		setPreferredSize(new java.awt.Dimension(800, 148));
+		setPreferredSize(new java.awt.Dimension(900, 148));
 
 		strategyLabel.setText("Select Strategy:");
 
 		envLabel.setText("Select Environment:");
 
 		envsSelector.setModel(loadEnvsFolderNames());
-		//Restore previous selected if available		
-		if(lastENVSelected!=-1) {
+		// Restore previous selected if available
+		if (lastENVSelected != -1) {
 			envsSelector.setSelectedIndex(lastENVSelected);
 		}
 		envsSelector.addActionListener(new java.awt.event.ActionListener() {
@@ -272,11 +275,11 @@ public class ControlPanel extends javax.swing.JFrame implements Observer {
 				CLPSelectorItemStateChanged(evt);
 			}
 		});
-		//Restore previous selected if available		
-		if(lastCLPSelected!=-1) {
+		// Restore previous selected if available
+		if (lastCLPSelected != -1) {
 			CLPSelector.setSelectedIndex(lastCLPSelected);
 		}
-		
+
 		CLPSelector.addActionListener(new java.awt.event.ActionListener() {
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				CLPSelectorActionPerformed(evt);
@@ -341,6 +344,14 @@ public class ControlPanel extends javax.swing.JFrame implements Observer {
 				.addActionListener(new java.awt.event.ActionListener() {
 					public void actionPerformed(java.awt.event.ActionEvent evt) {
 						visualizeDebugButtonActionPerformed(evt);
+					}
+				});
+
+		runAndUpdateButton.setText("R&U");
+		runAndUpdateButton
+				.addActionListener(new java.awt.event.ActionListener() {
+					public void actionPerformed(java.awt.event.ActionEvent evt) {
+						runAndUpdateButtonActionPerformed(evt);
 					}
 				});
 
@@ -446,7 +457,11 @@ public class ControlPanel extends javax.swing.JFrame implements Observer {
 																										.addPreferredGap(
 																												javax.swing.LayoutStyle.ComponentPlacement.RELATED)
 																										.addComponent(
-																												stepGoButton))
+																												stepGoButton)
+																										.addPreferredGap(
+																												javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+																										.addComponent(
+																												runAndUpdateButton))
 																						.addGroup(
 																								controlPanelLayout
 																										.createSequentialGroup()
@@ -703,7 +718,9 @@ public class ControlPanel extends javax.swing.JFrame implements Observer {
 																						.addComponent(
 																								visualizeDebugButton)
 																						.addComponent(
-																								stepGoButton))
+																								stepGoButton)
+																						.addComponent(
+																								runAndUpdateButton))
 																		.addGap(1,
 																				1,
 																				1)))
@@ -777,6 +794,11 @@ public class ControlPanel extends javax.swing.JFrame implements Observer {
 			java.awt.event.ActionEvent evt) {// GEN-FIRST:event_visualizeDebugButtonActionPerformed
 		DebugFrame.setDebugFrameVisible(visualizeDebugButton.isSelected());
 	}// GEN-LAST:event_visualizeDebugButtonActionPerformed
+
+	private void runAndUpdateButtonActionPerformed(
+			java.awt.event.ActionEvent evt) {// GEN-FIRST:event_visualizeDebugButtonActionPerformed
+		model.setStepGo(runAndUpdateButton.isSelected());
+	}
 
 	private void stepGoButtonActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_visualizeDebugButtonActionPerformed
 		model.setStepGo(stepGoButton.isSelected());
@@ -864,12 +886,12 @@ public class ControlPanel extends javax.swing.JFrame implements Observer {
 
 	private void CLPSelectorActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_CLPSelectorActionPerformed
 		// TODO add your handling code here:
-		lastCLPSelected=CLPSelector.getSelectedIndex();
+		lastCLPSelected = CLPSelector.getSelectedIndex();
 	}// GEN-LAST:event_CLPSelectorActionPerformed
 
 	private void envsSelectorActionPerformed(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_envsSelectorActionPerformed
 		// TODO add your handling code here:
-		lastENVSelected=envsSelector.getSelectedIndex();
+		lastENVSelected = envsSelector.getSelectedIndex();
 	}// GEN-LAST:event_envsSelectorActionPerformed
 
 	private void CLPSelectorItemStateChanged(java.awt.event.ItemEvent evt) {// GEN-FIRST:event_CLPSelectorItemStateChanged
@@ -924,8 +946,6 @@ public class ControlPanel extends javax.swing.JFrame implements Observer {
 	// });
 	// }
 
-
-
 	public JTextField getStepTextField() {
 		return stepTextField;
 	}
@@ -959,15 +979,14 @@ public class ControlPanel extends javax.swing.JFrame implements Observer {
 		return controlPanel;
 	}
 
-	/*String oldFacts="";
-	public void getNewFactsList() {
-		String newFactsString=model.getFactList();
-		String[] newFacts=
-				
-		
-		factsMonitor.getListModel().add
-	}*/
-	
+	/*
+	 * String oldFacts=""; public void getNewFactsList() { String
+	 * newFactsString=model.getFactList(); String[] newFacts=
+	 * 
+	 * 
+	 * factsMonitor.getListModel().add }
+	 */
+
 	@Override
 	public void update(Observable o, Object o1) {
 		try {
@@ -979,9 +998,11 @@ public class ControlPanel extends javax.swing.JFrame implements Observer {
 			if (factsMonitor.isVisible()) {
 				long start = System.currentTimeMillis();
 				factsMonitor.setText(model.getFactList());
-				/*String facts=model.getFactList();
-				
-				factsMonitor.getListModel().add*/
+				/*
+				 * String facts=model.getFactList();
+				 * 
+				 * factsMonitor.getListModel().add
+				 */
 				System.out.println("[FACT-RETRIEVE-TIME]: "
 						+ (System.currentTimeMillis() - start) + " ms.");
 			} else {
