@@ -234,7 +234,18 @@
 	(not (init-agent (done yes)))
 	(access-cell (pos-r ?r1) (pos-c ?c1))
 	(access-cell (pos-r ?r2) (pos-c ?c2))
-	;(test (or (neq ?r1 ?r2) (neq ?c1 ?c2))) ;the two cells must be different
+	(not (pcpc (source-r ?r1) (source-c ?c1) (dest-r ?r2) (dest-c ?c2))) ;the cost must not be calculated yet
+	=>
+		(assert (calculate-pcpc (source-r ?r1) (source-c ?c1) (dest-r ?r2) (dest-c ?c2)))
+		(focus PCPC)
+)
+
+;calculate costs from starting position to all the dispensers, so it hasn't to be done after first order
+(defrule beginagent2-pcpc-parking-to-dispenser
+	(declare (salience 14))
+	(not (init-agent (done yes)))
+	(initial_agentposition (pos-r ?r1) (pos-c ?c1))
+	(access-cell (object FD|DD) (pos-r ?r2) (pos-c ?c2))
 	(not (pcpc (source-r ?r1) (source-c ?c1) (dest-r ?r2) (dest-c ?c2))) ;the cost must not be calculated yet
 	=>
 		(assert (calculate-pcpc (source-r ?r1) (source-c ?c1) (dest-r ?r2) (dest-c ?c2)))
