@@ -218,13 +218,16 @@
             (and
                 (access-cell (object FD) (pos-r ?fdb-r) (pos-c ?fdb-c))
                 (and
-                    (pcpc (source-r ?ag-r) (source-c ?ag-c) (dest-r ?fdb-r) (dest-c ?fdb-c) (cost ?pos-fdb))
-                    (and 
-                        (pcpc (source-r ?fdb-r) (source-c ?fdb-c) (dest-r ?tbac-r) (dest-c ?tbac-c) (cost ?fdb-tab))    
-                        (and
-                            (test (> (dist-btw-pos-table ?pos-fd ?fd-tab) (dist-btw-pos-table ?pos-fdb ?fdb-tab)))
-                        )            
-                    )
+                	(access-cell (obj-r ?tb-r) (obj-c ?tb-c) (pos-r ?tbb-r) (pos-c ?tbb-c))
+                	(and
+	                    (pcpc (source-r ?ag-r) (source-c ?ag-c) (dest-r ?fdb-r) (dest-c ?fdb-c) (cost ?pos-fdb))
+	                    (and 
+	                        (pcpc (source-r ?fdb-r) (source-c ?fdb-c) (dest-r ?tbb-r) (dest-c ?tbb-c) (cost ?fdb-tab))    
+	                        (and
+	                            (test (> (dist-btw-pos-table ?pos-fd ?fd-tab) (dist-btw-pos-table ?pos-fdb ?fdb-tab)))
+	                        )            
+	                    )
+	                )
                 )
             )
         )
@@ -321,13 +324,16 @@
             (and
                 (access-cell (object DD) (pos-r ?fdb-r) (pos-c ?fdb-c))
                 (and
-                    (pcpc (source-r ?ag-r) (source-c ?ag-c) (dest-r ?fdb-r) (dest-c ?fdb-c) (cost ?pos-fdb))
-                    (and 
-                        (pcpc (source-r ?fdb-r) (source-c ?fdb-c) (dest-r ?tbac-r) (dest-c ?tbac-c) (cost ?fdb-tab))    
-                        (and
-                            (test (> (dist-btw-pos-table ?pos-fd ?fd-tab) (dist-btw-pos-table ?pos-fdb ?fdb-tab)))
-                        )            
-                    )
+                	(access-cell (obj-r ?tb-r) (obj-c ?tb-c) (pos-r ?tbb-r) (pos-c ?tbb-c))
+                	(and
+	                    (pcpc (source-r ?ag-r) (source-c ?ag-c) (dest-r ?fdb-r) (dest-c ?fdb-c) (cost ?pos-fdb))
+	                    (and 
+	                        (pcpc (source-r ?fdb-r) (source-c ?fdb-c) (dest-r ?tbb-r) (dest-c ?tbb-c) (cost ?fdb-tab))    
+	                        (and
+	                            (test (> (dist-btw-pos-table ?pos-fd ?fd-tab) (dist-btw-pos-table ?pos-fdb ?fdb-tab)))
+	                        )            
+	                    )
+	                )
                 )
             )
         )=>
