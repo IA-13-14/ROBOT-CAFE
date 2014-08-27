@@ -60,6 +60,16 @@
         (assert (printGUI (time ?t) (step ?s) (source "AGENT::UPDATE-BEL") (verbosity 2) (text  "UPDATE-BEL Module invoked")))
 )
 
+;Controlla dov'erano le persone al passo precedente
+(defrule find-old-person
+	(declare (salience 95))
+	(UPDATE-BEL__runonce)
+	(K-cell (initial no) (contains Person) (pos-r ?r) (pos-c ?c))
+	(perc-vision) ;k-cell not yet updated
+	=>
+		(assert (person-pos ?r ?c))
+)
+
 ;Regola per rimuovere le vecchie percezioni, ormai obsolete
 (defrule clean-old-K-cell
     (declare (salience 90))
@@ -223,14 +233,35 @@
     (modify ?ka (pos-r ?r) (pos-c ?c) (direction south)) ;update K-agent
 )
 
+;if some person may have moved, remove all unreachable-cell beliefs
+(defrule person-moved
+	(declare (salience 10))
+	(not (perc-vision)) ;do this after k-cell update
+	(person-pos ?r ?c)
+	(not (K-cell (pos-r ?r) (pos-c ?c) (contains Person)))
+	?ac <- (access-cell (reachable no))
+	=>
+		(modify ?ac (reachable yes))
+)
 
-;/-----------------------------------------/
-;/*****            TODO               *****/
-;/-----------------------------------------/
+;remove all person-pos
+(defrule person-done
+	(declare (salience 9))
+	(not (perc-vision))
+	?p <- (person-pos $?)
+	=>
+		(retract ?p)
+)
 
-;    - Gestire le altre percezioni (es bump)
-;    - PLANNING: Ordinazioni
-;    - PLANNING: Movimenti
+;if cells are accessible again, all desires become possible (how romantic!)
+(defrule desires-possible
+	(declare (salience 8))
+	(not (perc-vision))
+	(not (access-cell (reachable no)))
+	?d <- (desire (possible no))
+	=>
+		(modify ?d (possible yes))
+)
 
 (defrule perc-msg-to-agent-order   
     ;?ridc <- (req-id-counter ?rid)
