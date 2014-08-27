@@ -1,4 +1,5 @@
 4desire_pcpc_repath
 --------
 
-Se la forward è impossibile fa una turnright e ricalcola immediatamente il percorso
+Quando una persona blocca la strada (forward impossibile) fa turn-right e
+ricalcola immediatamente il percorso migliore (evitando di attenersi al precedente già calcolato)
