@@ -31,7 +31,7 @@
     (retract ?f)
 )
 
-;TEST: Clean table are more less important than orders.
+;TEST: Clean table are less important than orders.
 
 ;FIFO Strategy + Clean priority
 (defrule fifo-deliberation-clean-priority

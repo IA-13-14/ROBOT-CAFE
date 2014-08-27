@@ -32,12 +32,11 @@
     (retract ?f)
 )
 
-;TEST: Clean table are more important than orders !
-;Must be tested if good euristic !
+;TEST: Clean table are less important than orders.
 
 ;FIFO Strategy + Clean priority
 (defrule fifo-deliberation-clean-priority
-    (declare (salience 100))
+    (declare (salience 80))
     (not (intention))
     (status (step ?s) (time ?t))
     ;Find oldest clean desire
