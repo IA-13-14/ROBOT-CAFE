@@ -485,7 +485,7 @@ public class ControlPanel extends javax.swing.JFrame implements Observer {
 																																		.addComponent(
 																																				CLPSelector,
 																																				javax.swing.GroupLayout.PREFERRED_SIZE,
-																																				100,
+																																				180,
 																																				javax.swing.GroupLayout.PREFERRED_SIZE))
 																														.addGroup(
 																																controlPanelLayout
@@ -497,7 +497,7 @@ public class ControlPanel extends javax.swing.JFrame implements Observer {
 																																		.addComponent(
 																																				envsSelector,
 																																				javax.swing.GroupLayout.PREFERRED_SIZE,
-																																				100,
+																																				180,
 																																				javax.swing.GroupLayout.PREFERRED_SIZE)))))
 																		.addPreferredGap(
 																				javax.swing.LayoutStyle.ComponentPlacement.RELATED,
