@@ -94,7 +94,7 @@
     
     ;Check if desire is an order that can be served = table clean
     (or
-    	(test (eq ?d-type order))
+    	(test (eq ?d-type clean))
     	(K-table (step ?s) (table ?d-table) (state Clean))
     )
     =>
