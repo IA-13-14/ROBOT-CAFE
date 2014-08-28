@@ -727,6 +727,30 @@
 
 ;#### END - Empty garbage plan ####
 
+;### Move-away plan ###
+(defrule moveaway-start
+	?f <- (PLANNER__runonce)
+	(not (planning))
+	(intention (type move-away) (pos-r ?r) (pos-c ?c))
+	(status (step ?s) (time ?t))
+	(K-agent (step ?s) (pos-r ?ag-r) (pos-c ?ag-c))
+	(K-cell (pos-r ?c-r&:(= (abs (- ?r ?c-r)) 1)) (pos-c ?c-c&:(= (abs (- ?c ?c-c)) 1)) (contains Empty|Parking)) ;cell diagonal to person
+	(not (K-cell (pos-r ?c-r) (pos-c ?c-c) (contains ~Empty&~Parking)))
+	(not
+		(and
+			(K-cell (pos-r ?c2-r&:(= (abs (- ?r ?c2-r)) 1)) (pos-c ?c2-c&:(= (abs (- ?c ?c2-c)) 1)) (contains Empty|Parking)) ;cell diagonal to person
+			(and
+				(not (K-cell (pos-r ?c2-r) (pos-c ?c2-c) (contains ~Empty&~Parking)))
+				(test (< (+ (abs (- ?ag-r ?c-r)) (abs (- ?ag-c ?c-c))) (+ (abs (- ?ag-r ?c2-r)) (abs (- ?ag-c ?c2-c))))) ;cell closest to robot (manhattan distance)
+			)
+		)
+	)
+	=>
+		(assert (plan-action (seq 0) (action Goto) (param1 ?c-r) (param2 ?c-c)))
+		(retract ?f)
+)
+;### END - Move-away plan ###
+
 ;End runonce section
 ;(defrule stop-runonce
 ;    ?f <- (PLANNER__runonce)

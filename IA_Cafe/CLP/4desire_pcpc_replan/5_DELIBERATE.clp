@@ -32,7 +32,7 @@
 )
 
 ;Desires order if a (possible) load exists: deliver, clean(on table that made an order), empty, load
-;Desires order if there's no load desire: deliver, clean, empty
+;Desires order if there's no load desire: deliver, clean, empty, move-away
 
 (defrule deliberation-deliver-pcpc ;calculate pcpc if not present
 	(declare (salience 99))
@@ -303,6 +303,27 @@
 		(retract ?vf)
 )
 
+(defrule deliberation-move-away
+	(declare (salience 10))
+	(not (intention))
+	(status (step ?s) (time ?t))
+	(desire (type move-away) (pos-r ?r) (pos-c ?c) (step ?d-s) (time ?d-t) (id ?d-id) (possible yes))
+	?f <- (intentions_changed)
+	=>
+		(assert (printGUI (time ?t) (step ?s) (source "AGENT::DELIBERATE") (verbosity 2) (text  "Added intention (Time:%p1,Type:%p2,P:%p3-%p4)") (param1 ?d-t) (param2 move-away) (param3 ?r) (param4 ?c)))
+		(assert (intention  (step ?d-s)
+                            (time ?d-t)
+                            (accepted-step ?s)
+                            (accepted-time ?t)
+                            (type move-away)
+                            (pos-r ?r)
+                            (pos-c ?c)
+                            (desire ?d-t)
+                            (desire-id ?d-id)
+                )
+        )
+        (modify ?f (changed yes))
+)
 ;Dispose
 (defrule dispose
     (declare (salience -100))

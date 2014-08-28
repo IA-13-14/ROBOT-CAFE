@@ -263,6 +263,40 @@
 		(modify ?d (possible yes))
 )
 
+;if there is a person nearby, create move-away desire
+(defrule moveaway-create
+	(declare (salience 7))
+	(not (perc-vision))
+	(status (step ?s) (time ?t))
+	(K-agent (step ?s) (pos-r ?ag-r) (pos-c ?ag-c))
+	(K-cell (pos-r ?r) (pos-c ?c) (contains Person))
+	(or ;robot is not diagonal to the person
+		(test (neq (abs (- ?ag-r ?r)) 1))
+		(test (neq (abs (- ?ag-c ?c)) 1))
+	)
+	(not (desire (type move-away) (pos-r ?r) (pos-c ?c)))
+	=>
+		(assert (desire (step ?s) (time ?t) (id -1) (type move-away) (pos-r ?r) (pos-c ?c)))
+)
+
+;remove move-away desires
+(defrule moveaway-remove
+	(declare (salience 6))
+	(not (perc-vision))
+	(status (step ?s))
+	(K-agent (step ?s) (pos-r ?ag-r) (pos-c ?ag-c))
+	?des <- (desire (type move-away) (pos-r ?r) (pos-c ?c))
+	(or ;robot is already diagonal to that person, or there is no person in that cell
+		(and
+			(test (= (abs (- ?ag-r ?r)) 1))
+			(test (= (abs (- ?ag-c ?c)) 1))
+		)
+		(not (K-cell (pos-r ?r) (pos-c ?c) (contains Person)))
+	)
+	=>
+		(retract ?des)
+)
+
 (defrule perc-msg-to-agent-order   
     ;?ridc <- (req-id-counter ?rid)
     (status (step ?s))
