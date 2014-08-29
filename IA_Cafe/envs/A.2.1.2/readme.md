@@ -1,4 +1,4 @@
-A.2.1.1: S-I Disp vs S-I Opt
+A.2.1.2: S-I Disp vs S-I Opt
 
 Caratteristiche:
 
