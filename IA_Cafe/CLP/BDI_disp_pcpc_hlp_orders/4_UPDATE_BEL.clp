@@ -396,12 +396,40 @@
 )
 
 ;Aggiorna stato azione precedente CleanTable
-(defrule update-lastaction-CleanTable 
+(defrule update-lastaction-CleanTable-food
     (status (step ?s))	
     (exec-history (step =(- ?s 1)) (action CleanTable) (param1 ?p1) (param2 ?p2) (param3 ?p3))
     (Table (table-id ?tid) (pos-r ?p1) (pos-c ?p2))
     ?ka <- (K-agent (step ?s) (time ?t) (l_f_waste ?lw-food) (l_d_waste ?lw-drink))   
-    ?kt <- (K-table  (step ?s) (table ?tid))
+    ?kt <- (K-table  (step ?s) (table ?tid) (food ?food&:(> ?food 0)) (drink 0))
+    ?f <- (UPDATE-BEL__exec-history-runonce)
+    =>
+        (assert (printGUI (time ?t) (step ?s) (source "AGENT::UPDATE-BEL") (verbosity 2) (text  "After CleanTable on table (%p1) loaded Waste Food and Drink") (param1 ?tid)))
+        (modify ?ka (l_f_waste yes))
+        (modify ?kt (step ?s) (state Clean) (food 0) (drink 0))    
+        (retract ?f)
+)
+
+(defrule update-lastaction-CleanTable-drink
+    (status (step ?s))	
+    (exec-history (step =(- ?s 1)) (action CleanTable) (param1 ?p1) (param2 ?p2) (param3 ?p3))
+    (Table (table-id ?tid) (pos-r ?p1) (pos-c ?p2))
+    ?ka <- (K-agent (step ?s) (time ?t) (l_f_waste ?lw-food) (l_d_waste ?lw-drink))   
+    ?kt <- (K-table  (step ?s) (table ?tid) (food 0) (drink ?drink&:(> ?drink 0)))
+    ?f <- (UPDATE-BEL__exec-history-runonce)
+    =>
+        (assert (printGUI (time ?t) (step ?s) (source "AGENT::UPDATE-BEL") (verbosity 2) (text  "After CleanTable on table (%p1) loaded Waste Food and Drink") (param1 ?tid)))
+        (modify ?ka (l_d_waste yes))
+        (modify ?kt (step ?s) (state Clean) (food 0) (drink 0))    
+        (retract ?f)
+)
+
+(defrule update-lastaction-CleanTable-both
+    (status (step ?s))	
+    (exec-history (step =(- ?s 1)) (action CleanTable) (param1 ?p1) (param2 ?p2) (param3 ?p3))
+    (Table (table-id ?tid) (pos-r ?p1) (pos-c ?p2))
+    ?ka <- (K-agent (step ?s) (time ?t) (l_f_waste ?lw-food) (l_d_waste ?lw-drink))   
+    ?kt <- (K-table  (step ?s) (table ?tid) (food ?food&:(> ?food 0)) (drink ?drink&:(> ?drink 0)))
     ?f <- (UPDATE-BEL__exec-history-runonce)
     =>
         (assert (printGUI (time ?t) (step ?s) (source "AGENT::UPDATE-BEL") (verbosity 2) (text  "After CleanTable on table (%p1) loaded Waste Food and Drink") (param1 ?tid)))
