@@ -111,6 +111,7 @@ public class MonitorView extends ClipsView implements Observer {
 
 		map_img.put("person_Person", "person_empty.png"); // Persona in piedi
 		map_img.put("person_Seat", "person_seat.png"); // Persona seduta
+		map_img.put("person_Empty", "person_empty.png"); // Persona in piedi
 
 		model = new MonitorModel();
 		model.addObserver((Observer) this);

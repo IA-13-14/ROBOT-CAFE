@@ -140,9 +140,9 @@ public class MonitorModel extends ClipsModel {
                     int person_r = new Integer(person[3]);
                     int person_c = new Integer(person[4]);
                     String ident = person[2];
-                    //Nel modello abbiamo la stringa agent_background_ident, la cosa verrà interpretata nella View (updateMap())
-                    String background = map[person_r - 1][person_c - 1];
-                    map[person_r - 1][person_c - 1] = "person_" + background +"_"+ident;
+                    //Nel modello abbiamo la stringa agent_background_ident, la cosa verrà interpretata nella View (updateMap())                 
+                    String background = map[person_r-1][person_c-1];
+                    map[person_r-1][person_c-1] = "person_" + background +"_"+ident;
                 }
             }
         }
