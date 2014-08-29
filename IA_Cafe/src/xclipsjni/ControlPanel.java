@@ -832,7 +832,7 @@ public class ControlPanel extends javax.swing.JFrame implements Observer {
 		// Il tasto può essere Run oppure Stop (a seconda di cosa era attivo)
 		if (runButton.getText().equals("Stop")) {
 			model.setMode("STOP");
-			model.resume();
+			//model.resume();
 			runButton.setText("Run");
 			stepButton.setEnabled(true);
 			runOneButton.setEnabled(true);

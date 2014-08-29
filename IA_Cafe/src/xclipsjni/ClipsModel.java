@@ -209,7 +209,7 @@ public abstract class ClipsModel extends Observable implements Runnable {
 						action();
 						this.setChanged();
 						this.notifyObservers("actionDone");
-					}
+					}					
 					this.suspend();
 				}
 			}
