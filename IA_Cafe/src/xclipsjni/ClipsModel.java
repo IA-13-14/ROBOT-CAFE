@@ -165,6 +165,7 @@ public abstract class ClipsModel extends Observable implements Runnable {
 				 * HO CLICCATO IL TASTO RUN
 				 */
 				else if (executionMode == 4) {
+					long start = System.currentTimeMillis();
 					System.out.println("Clicked on RUN (infinite)");
 					long run_feedback = 1;
 					String[] arrayPercept = { "step" };
@@ -192,7 +193,10 @@ public abstract class ClipsModel extends Observable implements Runnable {
 					 * prossima percezione, facendo una run.
 					 */
 					run_feedback = core.run();
-					// Stop solo dopo un halt di CLIPS
+					
+					System.out.println("[TOTAL-RUN-TIME]: "+ (System.currentTimeMillis()-start));
+					
+					// Stop solo dopo un halt di CLIPS										
 					executionMode = 0;
 					// while(prec.equals(actual)) {
 					// run_feedback = core.runOnce();
