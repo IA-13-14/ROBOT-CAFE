@@ -141,10 +141,21 @@
     (and (test (> ?food ?lf)) (test (> ?slots 0)))
     ;FD Best position
         (var tablepos ?tb-r ?tb-c)
+        ;Table access-cell
+        (access-cell (obj-r ?tb-r) (obj-c ?tb-c) (pos-r ?tbac-r) (pos-c ?tbac-c))
         ?vpos <- (var agentPos ?ag-r ?ag-c)
+        ;FD access-cell
         (access-cell (object FD) (obj-r ?fd-r) (obj-c ?fd-c) (pos-r ?r) (pos-c ?c))
         ;Not exists any FD closer to both pos and table
-        (not (access-cell (object FD) (pos-r ?r1) (pos-c ?c1&:(> (dist-btw-pos-table ?ag-r ?ag-c ?tb-r ?tb-c ?r ?c) (dist-btw-pos-table ?ag-r ?ag-c ?tb-r ?tb-c ?r1 ?c1)))))
+        (not 
+         	(and
+            	(access-cell (obj-r ?tb-r) (obj-c ?tb-c) (pos-r ?tbb-r) (pos-c ?tbb-c))
+        		(and
+        			(access-cell (object FD) (pos-r ?r1) (pos-c ?c1))
+        			(test (> (dist-btw-pos-table ?ag-r ?ag-c ?tbac-r ?tbac-c ?r ?c) (dist-btw-pos-table ?ag-r ?ag-c ?tbb-r ?tbb-c ?r1 ?c1)))
+        		)
+        	)
+        )
     =>
         ;Goto FD
         (assert (plan-action (seq ?pseq) (action Goto) (param1 ?r) (param2 ?c)))
@@ -182,10 +193,21 @@
     (and (test (> ?drink ?ld)) (test (> ?slots 0)))
     ;DD Best position 
         (var tablepos ?tb-r ?tb-c)
+        ;Table access-cell
+        (access-cell (obj-r ?tb-r) (obj-c ?tb-c) (pos-r ?tbac-r) (pos-c ?tbac-c))
         ?vpos <- (var agentPos ?ag-r ?ag-c)
+        ;DD access-cell        
         (access-cell (object DD) (obj-r ?dd-r) (obj-c ?dd-c) (pos-r ?r) (pos-c ?c))
         ;Not exists any DD closer to both pos and table
-        (not (access-cell (object DD) (pos-r ?r1) (pos-c ?c1&:(> (dist-btw-pos-table ?ag-r ?ag-c ?tb-r ?tb-c ?r ?c) (dist-btw-pos-table ?ag-r ?ag-c ?tb-r ?tb-c ?r1 ?c1)))))
+        (not 
+         	(and
+            	(access-cell (obj-r ?tb-r) (obj-c ?tb-c) (pos-r ?tbb-r) (pos-c ?tbb-c))
+        		(and
+        			(access-cell (object DD) (pos-r ?r1) (pos-c ?c1))
+        			(test (> (dist-btw-pos-table ?ag-r ?ag-c ?tbac-r ?tbac-c ?r ?c) (dist-btw-pos-table ?ag-r ?ag-c ?tbb-r ?tbb-c ?r1 ?c1)))
+        		)
+        	)
+        )
    =>
         ;Goto DD
         (assert (plan-action (seq ?pseq) (action Goto) (param1 ?r) (param2 ?c)))
@@ -221,7 +243,8 @@
     ;Table Best position
     ?vpos <- (var agentPos ?ag-r ?ag-c)
     (access-cell (object Table) (obj-r ?tabr) (obj-c ?tabc) (pos-r ?r) (pos-c ?c))
-    (not (access-cell (object Table) (obj-r ?tabr) (obj-c ?tabc) (pos-r ?r1) (pos-c ?c1&:(> (manh-cost ?ag-r ?ag-c ?r ?c) (manh-cost ?ag-r ?ag-c ?r1 ?c1)))))
+    ;Not exists any Table cell closer
+    (not (access-cell (object Table) (obj-r ?tabr) (obj-c ?tabc) (pos-r ?r1) (pos-c ?c1&:(> (manh-cost ?ag-r ?ag-c ?r ?c) (manh-cost ?ag-r ?ag-c ?r1 ?c1)))))	
     =>
         ;Goto Table
         (assert (plan-action (seq ?pseq) (action Goto) (param1 ?r) (param2 ?c)))  
