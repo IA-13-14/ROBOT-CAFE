@@ -297,7 +297,7 @@
         (assert (calculate-pcpc (source-direction south) (source-r ?fdac-r) (source-c ?fdac-c)
                                  (dest-direction any) (dest-r ?tbac-r) (dest-c ?tbac-c)))
         (focus PCPC)
-        (halt);DEBUG
+        ;(halt);DEBUG
 )
 
 ;Planning for serve order - If C - True
