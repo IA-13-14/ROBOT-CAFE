@@ -276,7 +276,7 @@
 	)
 	(not (desire (type move-away) (pos-r ?r) (pos-c ?c)))
 	=>
-		(assert (desire (step ?s) (time ?t) (id -1) (type move-away) (pos-r ?r) (pos-c ?c)))
+		(assert (desire (step ?s) (time ?t) (id -2) (type move-away) (pos-r ?r) (pos-c ?c)))
 )
 
 ;remove move-away desires
@@ -622,7 +622,7 @@
 	(not (desire (type empty)))
 	(K-agent (step ?s) (l_d_waste yes))
 	=>
-		(assert (desire (step ?s) (time ?t) (type empty)))
+		(assert (desire (step ?s) (time ?t) (id -1) (type empty)))
 )
 
 (defrule desire-empty-food
@@ -631,7 +631,7 @@
 	(not (desire (type empty)))
 	(K-agent (step ?s) (l_f_waste yes))
 	=>
-		(assert (desire (step ?s) (time ?t) (type empty)))
+		(assert (desire (step ?s) (time ?t) (id -1) (type empty)))
 )
 
 
