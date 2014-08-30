@@ -51,7 +51,7 @@
     ?ac <- (access-cell (pos-r ?d-r) (pos-c ?d-c) (reachable yes))
     =>
         (modify ?ac (reachable no))
-        (halt);DEBUG
+        ;(halt);DEBUG
 )
 
 (defrule path-planner-result-no

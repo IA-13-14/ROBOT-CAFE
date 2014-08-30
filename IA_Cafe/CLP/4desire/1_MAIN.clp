@@ -5,6 +5,15 @@
 
 ;// DEFTEMPLATE
 
+;// DEFTEMPLATE
+;#### For loading PCPC from file ####
+(deftemplate pcpc
+    (slot source-r)
+    (slot source-c)
+    (slot dest-r)
+    (slot dest-c)   
+    (slot cost) 
+)
 ;#####  required for GUI #####
 ; Per le stampe (interpretabili da CLIPSJNI)
 (deftemplate printGUI    
