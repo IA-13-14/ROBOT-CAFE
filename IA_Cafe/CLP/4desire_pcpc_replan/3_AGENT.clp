@@ -396,29 +396,31 @@
         (focus PLANNER)
 )
 
+;Planning failed
+(defrule BDI_loop_4_planning_failed
+	(declare (salience 79))
+	?bdis <- (BDistatus BDI-4)
+	?fail <- (PLANNER_FAILURE)
+	?int <- (intention)
+	=>
+		(retract ?bdis)
+		(retract ?fail)
+		(retract ?int)
+		(assert (BDistatus BDI-3)) ;Deliberate
+)
+
 ;Planning not needed
 (defrule BDI_loop_4_planning_not_needed
-    (declare (salience 80))
+    (declare (salience 78))
     (BDistatus BDI-4)    
     (status (step ?s) (time ?t))        
     =>
         (assert (printGUI (time ?t) (step ?s) (source "AGENT") (verbosity 2) (text  "BDI - Planning not needed !")))
 )
 
-;Planning failed
-(defrule BDI_loop_4_planning_failed
-	(declare (salience 79))
-	?bdis <- (BDistatus BDI-4)
-	?fail <- (PLANNER_FAILURE)
-	=>
-		(retract ?bdis)
-		(retract ?fail)
-		(assert (BDistatus BDI-3)) ;Deliberate
-)
-
 ;Planning done
 (defrule BDI_loop_4_planning_done
-	(declare (salience 78))
+	(declare (salience 77))
 	?bdis <- (BDistatus BDI-4)
 	=>
 		(retract ?bdis)

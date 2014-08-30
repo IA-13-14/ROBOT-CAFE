@@ -297,6 +297,24 @@
 		(retract ?des)
 )
 
+;remove move-away intention
+(defrule moveaway-intention-remove
+(declare (salience 5))
+	(not (perc-vision))
+	(status (step ?s))
+	(K-agent (step ?s) (pos-r ?ag-r) (pos-c ?ag-c))
+	?int <- (intention (type move-away) (pos-r ?r) (pos-c ?c))
+	(or ;robot is already diagonal to that person, or there is no person in that cell
+		(and
+			(test (= (abs (- ?ag-r ?r)) 1))
+			(test (= (abs (- ?ag-c ?c)) 1))
+		)
+		(not (K-cell (pos-r ?r) (pos-c ?c) (contains Person)))
+	)
+	=>
+		(retract ?int)
+)
+
 (defrule perc-msg-to-agent-order   
     ;?ridc <- (req-id-counter ?rid)
     (status (step ?s))

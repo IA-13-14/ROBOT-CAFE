@@ -366,6 +366,27 @@
 	(declare (salience 30))
 	?pln <- (planning (type deliver) (step unreachable))
 	=>
+		(modify ?pln (step pcpc))
+)
+
+(defrule deliver-pcpc
+	(declare (salience 50))
+	(planning (type deliver) (step pcpc) (param1 ?tab))
+	(status (step ?s))
+   	(K-agent (step ?s) (pos-r ?ag-r) (pos-c ?ag-c))
+	(not (access-cell (pos-r ?ag-r) (pos-c ?ag-c))) ;if we are on an access cell pcpc was calculated at start
+	(Table (table-id ?tab) (pos-r ?tabr) (pos-c ?tabc))
+	(access-cell (object Table) (obj-r ?tabr) (obj-c ?tabc) (pos-r ?ac-r) (pos-c ?ac-c) (reachable yes))
+	(not (pcpc (source-r ?ag-r) (source-c ?ag-c) (dest-r ?ac-r) (dest-c ?ac-c)))
+	=>
+		(assert (calculate-pcpc (source-r ?ag-r) (source-c ?ag-c) (dest-r ?ac-r) (dest-c ?ac-c)))
+		(focus PCPC)
+)
+
+(defrule deliver-pcpc-done
+	(declare (salience 49))
+	?pln <- (planning (type deliver) (step pcpc))
+	=>
 		(modify ?pln (step goto))
 )
 	
@@ -477,6 +498,27 @@
 (defrule clean-unreachable-done
 	(declare (salience 30))
 	?pln <- (planning (type clean) (step unreachable))
+	=>
+		(modify ?pln (step pcpc))
+)
+
+(defrule clean-pcpc
+	(declare (salience 50))
+	(planning (type clean) (step pcpc) (param1 ?tab))
+	(status (step ?s))
+   	(K-agent (step ?s) (pos-r ?ag-r) (pos-c ?ag-c))
+	(not (access-cell (pos-r ?ag-r) (pos-c ?ag-c))) ;if we are on an access cell pcpc was calculated at start
+	(Table (table-id ?tab) (pos-r ?tabr) (pos-c ?tabc))
+	(access-cell (object Table) (obj-r ?tabr) (obj-c ?tabc) (pos-r ?ac-r) (pos-c ?ac-c) (reachable yes))
+	(not (pcpc (source-r ?ag-r) (source-c ?ag-c) (dest-r ?ac-r) (dest-c ?ac-c)))
+	=>
+		(assert (calculate-pcpc (source-r ?ag-r) (source-c ?ag-c) (dest-r ?ac-r) (dest-c ?ac-c)))
+		(focus PCPC)
+)
+
+(defrule clean-pcpc-done
+	(declare (salience 49))
+	?pln <- (planning (type clean) (step pcpc))
 	=>
 		(modify ?pln (step clean))
 )
