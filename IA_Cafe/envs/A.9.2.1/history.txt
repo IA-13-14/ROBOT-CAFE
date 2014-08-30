@@ -1,0 +1,26 @@
+(personstatus 	
+	(step 0)
+    (time 0)
+	(ident C1)
+	(pos-r 13)
+	(pos-c 9)
+	(activity seated)
+)
+(personmove (step 20) (ident C1) (path-id P1))
+(move-path P1 1 C1  13 10)
+(move-path P1 2 C1  13 11)
+(move-path P1 3 C1  13 12)
+(move-path P1 4 C1  13 13)
+(move-path P1 5 C1  13 14)
+(move-path P1 6 C1  13 15)
+(move-path P1 7 C1  13 16)
+(move-path P1 8 C1  13 17)
+(move-path P1 9 C1  13 18)
+
+
+
+
+(event (step 6) (type request) (source T6) (food 1) (drink 1)) 
+(event (step 7) (type request) (source T2) (food 1) (drink 1))
+(event (step 45) (type finish) (source T6)) 
+(event (step 46) (type finish) (source T2))

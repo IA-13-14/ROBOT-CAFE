@@ -539,7 +539,7 @@
 	(not (desire (type empty)))
 	(K-agent (step ?s) (l_d_waste yes))
 	=>
-		(assert (desire (step ?s) (time ?t) (type empty)))
+		(assert (desire (step ?s) (time ?t) (id -1) (type empty)))
 )
 
 (defrule desire-empty-food
@@ -548,7 +548,7 @@
 	(not (desire (type empty)))
 	(K-agent (step ?s) (l_f_waste yes))
 	=>
-		(assert (desire (step ?s) (time ?t) (type empty)))
+		(assert (desire (step ?s) (time ?t) (id -1) (type empty)))
 )
 
 
