@@ -229,6 +229,7 @@
 	(not (pcpc (source-r ?r1) (source-c ?c1) (dest-r ?r2) (dest-c ?c2))) ;the cost must not be calculated yet
 	=>
 		(assert (calculate-pcpc (source-r ?r1) (source-c ?c1) (dest-r ?r2) (dest-c ?c2)))
+		;(printout t "PCPC-(" ?r1 "," ?c1 "),(" ?r2 "," ?c2 ")" crlf)
 		(focus PCPC)
 )
 
@@ -241,6 +242,7 @@
 	(not (pcpc (source-r ?r1) (source-c ?c1) (dest-r ?r2) (dest-c ?c2))) ;the cost must not be calculated yet
 	=>
 		(assert (calculate-pcpc (source-r ?r1) (source-c ?c1) (dest-r ?r2) (dest-c ?c2)))
+		;(printout t "PCPC-(" ?r1 "," ?c1 "),(" ?r2 "," ?c2 ")" crlf)
 		(focus PCPC)
 )
 
@@ -768,7 +770,7 @@
     ?f <- (AGENT__init) 
     =>
         (assert (exec-history (step ?i) (action ?oper) (param1 ?p1) (param2 ?p2) (param3 ?p3)))   
-        (printout t crlf  "== AGENT ==" crlf) (printout t "Start the execution of the action: " ?oper)
+        (printout t crlf  "== AGENT ==" crlf) (printout t "Start the execution of the action: " ?oper crlf)
         (assert (printGUI (time ?t) (step ?i) (source "AGENT") (verbosity 1) (text  "Start the execution of the action: %p1 (%p2,%p3,%p4)") (param1 ?oper) (param2 ?p1) (param3 ?p2) (param4 ?p3)))      
         (retract ?bdis)
         (assert (BDistatus BDI-0))      
