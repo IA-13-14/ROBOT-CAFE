@@ -6,6 +6,18 @@
 (defmodule UPDATE-BEL (import MAIN ?ALL) (import AGENT ?ALL) (export ?ALL))
 
 ; Initialization
+(defrule init-update-K-table-new-step
+	(declare (salience 105))
+    (not (UPDATE-BEL__init))
+    (status (step ?s) (time ?t)) 
+	;(K-table (step =(- ?s 1)) (table ?tab) (state ?state) (food ?f) (drink ?d))
+	?ktf <- (K-table (step =(- ?s 1)) (table ?tab) (state ?state) (food ?f) (drink ?d))
+	=>
+		;(assert (K-table (step ?s) (table ?tab) (state ?state) (food ?f) (drink ?d))) ;K-table for the new step
+		(modify ?ktf (step ?s)) ;update K-table for the new step
+) 
+
+; Initialization
 (defrule init-rule-new-step
     (declare (salience 100))
     (not (UPDATE-BEL__init))
