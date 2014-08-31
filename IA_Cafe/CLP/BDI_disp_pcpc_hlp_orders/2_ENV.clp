@@ -319,8 +319,12 @@
 
 (defrule neworder2     
     (declare (salience 200))
-    (status (step ?i) (time ?t))
-?f1<-   (event (step ?i) (type request) (source ?tb) (food ?nf) (drink ?nd))
+    (status (step ?i) (time ?t))    	
+?f1<-   (event (step ?ri&:(<= ?ri ?i)) (type request) (source ?tb) (food ?nf) (drink ?nd)) ;Check also if previous orders can be applied later
+	;Find oldest request
+	(not (event (step ?rib&:(< ?rib ?ri)) (type request) (source ?tb)))
+	(not (orderstatus (step ?i) (requested-by ?tb))) 
+	
     (tablestatus (step ?i) (table-id ?tb) (clean no))
         (cleanstatus (step ?i) (arrivaltime ?tt&:(< ?tt ?t)) (requested-by ?tb))
 => 
