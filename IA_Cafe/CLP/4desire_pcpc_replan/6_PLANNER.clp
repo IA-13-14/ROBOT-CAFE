@@ -23,6 +23,15 @@
     (slot param5 (default NA))
 )
 
+;New planning
+(defrule PLANNER__clean-planned
+	(declare (salience 110))
+	(not (PLANNER__init))
+	?int <- (intention (planned yes))
+	=>
+		(modify ?int (planned no))
+)
+
 ;Initilization
 (defrule PLANNER__init-rule
     (declare (salience 100))
