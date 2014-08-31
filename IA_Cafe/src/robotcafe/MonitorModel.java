@@ -1,9 +1,10 @@
 package robotcafe;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import xclipsjni.ClipsModel;
+import java.util.Arrays;
+import java.util.Comparator;
+
 import xclipsjni.ClipsException;
+import xclipsjni.ClipsModel;
 
 /**
  * L'implementazione della classe ClipsModel specifica per il progetto Waitor 2013/2014.
@@ -28,7 +29,18 @@ public class MonitorModel extends ClipsModel {
     private Integer l_drink; // quantità di drink contenuta
     private Integer l_food; //quantità di food contenuta
 
-    /**
+    private String ordersStatusString;
+    private String cleansStatusString;
+    
+    public String getOrdersStatusString() {
+		return ordersStatusString;
+	}
+
+    public String getCleansStatusString() {
+		return cleansStatusString;
+	}
+    
+	/**
      * Costruttore del modello per il progetto Monitor
      *
      */
@@ -189,6 +201,59 @@ public class MonitorModel extends ClipsModel {
                 }
             }
         }
+        
+        
+        // ######################## FATTI orderstatus ##########################  
+        String[] arrayOrderStatus = {/*"step", "time",*/ "arrivaltime", "requested-by", "drink-order", "food-order", "drink-deliv","food-deliv","answer"};
+        String[][] ordersStatus = core.findAllFacts("ENV", "orderstatus", "TRUE", arrayOrderStatus);
+        StringBuffer ordersStatusStringBuffer=new StringBuffer();
+        if(ordersStatus != null) {
+        	int c=0;
+        	
+        	Arrays.sort(ordersStatus, new Comparator<String[]>() {
+                @Override
+                public int compare(final String[] entry1, final String[] entry2) {
+                	final int time1 = Integer.parseInt(entry1[0]);
+                    final int time2 = Integer.parseInt(entry2[0]);
+                    return time1-time2;
+                }
+        	});
+        	
+            for (String[] orderStatus : ordersStatus) {   
+            	ordersStatusStringBuffer.append("(ORDER-");
+                for(int i=0;i<arrayOrderStatus.length;i++)
+                	ordersStatusStringBuffer.append(arrayOrderStatus[i]+": "+orderStatus[i]+", ");
+                ordersStatusStringBuffer.append(")\n");
+                c++;
+            }
+        }
+        ordersStatusString=ordersStatusStringBuffer.toString();
+        
+     // ######################## FATTI cleanstatus ##########################  
+        String[] arrayCleanStatus = {/*"step", "time",*/ "arrivaltime", "requested-by", "source"};
+        String[][] cleansStatus = core.findAllFacts("ENV", "cleanstatus", "TRUE", arrayCleanStatus);
+        StringBuffer cleansStatusStringBuffer=new StringBuffer();
+        if(cleansStatus != null) {
+        	int c=0;
+        	
+        	Arrays.sort(cleansStatus, new Comparator<String[]>() {
+                @Override
+                public int compare(final String[] entry1, final String[] entry2) {
+                    final int time1 = Integer.parseInt(entry1[0]);
+                    final int time2 = Integer.parseInt(entry2[0]);
+                    return time1-time2;
+                }
+        	});
+        	
+            for (String[] cleanStatus : cleansStatus) {   
+            	cleansStatusStringBuffer.append("(CLEAN-");
+                for(int i=0;i<arrayCleanStatus.length;i++)
+                	cleansStatusStringBuffer.append(arrayCleanStatus[i]+": "+cleanStatus[i]+", ");
+                cleansStatusStringBuffer.append(")\n");
+                c++;
+            }
+        }
+        cleansStatusString=cleansStatusStringBuffer.toString();
         
         // #### Penalit� ####
         score= new Integer(core.findOrderedFact("MAIN", "penalty"));

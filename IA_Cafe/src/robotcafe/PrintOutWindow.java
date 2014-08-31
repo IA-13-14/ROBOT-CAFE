@@ -11,8 +11,10 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
+
 import javax.swing.JLabel;
 import javax.swing.JSlider;
+import javax.swing.JTextPane;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
@@ -82,9 +84,11 @@ public class PrintOutWindow extends javax.swing.JFrame {
         jLabel4 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
         jScrollPane2 = new javax.swing.JScrollPane();
+        jScrollPane3 = new javax.swing.JScrollPane();
         jTable1 = new javax.swing.JTable();
         jLabel2 = new javax.swing.JLabel();
         AgentStatusStepLabel = new javax.swing.JLabel();
+        orderStatusPane = new JTextPane();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setTitle("Output");
@@ -94,6 +98,8 @@ public class PrintOutWindow extends javax.swing.JFrame {
         output.setContentType("text/html"); // NOI18N
         output.setText("<html>\n  <head>\n\n  </head>\n  <body style=\"margin: 7px 10px 7px 10px\">\n    <p style=\"margin: 1px\">\n      \n    </p>\n  </body>\n</html>\n");
         jScrollPane1.setViewportView(output);
+        
+        jScrollPane3.setViewportView(orderStatusPane);
 
         jSlider1.setMajorTickSpacing(1);
         jSlider1.setMaximum(2);
@@ -158,6 +164,7 @@ public class PrintOutWindow extends javax.swing.JFrame {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(jScrollPane1)
+            .addComponent(jScrollPane3)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -176,7 +183,8 @@ public class PrintOutWindow extends javax.swing.JFrame {
                                 .addComponent(jLabel2)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(AgentStatusStepLabel)
-                                .addGap(0, 0, Short.MAX_VALUE))))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                )))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel3)
                         .addGap(47, 47, 47)
@@ -197,6 +205,8 @@ public class PrintOutWindow extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 287, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 287, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel1)
@@ -208,7 +218,7 @@ public class PrintOutWindow extends javax.swing.JFrame {
                             .addComponent(jLabel2)
                             .addComponent(AgentStatusStepLabel))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)))                
                 .addContainerGap())
         );
 
@@ -268,10 +278,12 @@ public class PrintOutWindow extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel5;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSlider jSlider1;
     private javax.swing.JTable jTable1;
     private javax.swing.JTextPane output;
+    private javax.swing.JTextPane orderStatusPane;
     // End of variables declaration//GEN-END:variables
 
 
@@ -373,5 +385,9 @@ public class PrintOutWindow extends javax.swing.JFrame {
 
     public JSlider getVerboseSlider() {
         return this.jSlider1;
+    }
+    
+    public void updateOrderStatus(String text) {
+    	this.orderStatusPane.setText(text);
     }
 }
