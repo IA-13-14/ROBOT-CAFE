@@ -1,20 +1,61 @@
 import java.util.Random;
 
+/**
+ * This class generates automatically an order history for the NG-Cafè, using
+ * Gaussian distribution with given parameters.
+ * 
+ * @author BLN
+ *
+ */
 public class HistoryGenerator {
 
 	public int tablesNumber;
 
+	/**
+	 * 
+	 * @param tablesNumber
+	 *            the total number of tables available in the cafè.
+	 */
 	public HistoryGenerator(int tablesNumber) {
 		this.tablesNumber = tablesNumber;
 	}
 
+	/**
+	 * Generates an order and finish history with the given parameters. <br/>
+	 * Tables are selected with uniform distribution.
+	 * 
+	 * @param initialStep
+	 *            the initial step to start from.
+	 * @param stepDuration
+	 *            the maximum step to end to (last order may exceed this limit).
+	 * @param orderSizeMean
+	 *            the Gaussian distribution mean for the order size simulation.
+	 * @param orderSizeDeviation
+	 *            the Gaussian distribution standard deviation for the order
+	 *            size simulation.
+	 * @param orderIntervalMean
+	 *            the Gaussian distribution mean for the order interval
+	 *            simulation.
+	 * @param orderIntervalDeviation
+	 *            the Gaussian distribution standard deviation for the order
+	 *            interval simulation.
+	 * @param finishIntervalMean
+	 *            the Gaussian distribution mean for the finish interval
+	 *            simulation.
+	 * @param finishIntervalDeviation
+	 *            the Gaussian distribution standard deviation for the finish
+	 *            interval simulation.
+	 * @param finishProbability
+	 *            the probability to have a finish after each order.
+	 * @return the generated history.
+	 */
 	public String generate(int initialStep, int stepDuration,
 			double orderSizeMean, double orderSizeDeviation,
 			double orderIntervalMean, double orderIntervalDeviation,
 			double finishIntervalMean, double finishIntervalDeviation,
 			double finishProbability) {
 		String history = "";
-		boolean orderMustSendFinish[]= new boolean[tablesNumber+1];
+		boolean orderMustSendFinish[] = new boolean[tablesNumber + 1];
 		Random rd = new Random();
 
 		int currentStep = initialStep;
@@ -44,11 +85,12 @@ public class HistoryGenerator {
 
 			currentStep += orderInterval;
 
-			if(orderMustSendFinish[table]){
-				orderMustSendFinish[table]=false;
-				history += "\n(event (step 1) (type finish) (source T" + table + "))";
+			if (orderMustSendFinish[table]) {
+				orderMustSendFinish[table] = false;
+				history += "\n(event (step 1) (type finish) (source T" + table
+						+ "))";
 			}
-			
+
 			history += "\n(event (step " + currentStep
 					+ ") (type request) (source T" + table + ") (food "
 					+ foodSize + ") (drink " + drinkSize + "))";
@@ -61,11 +103,10 @@ public class HistoryGenerator {
 
 				history += "\n(event (step " + finishInterval
 						+ ") (type finish) (source T" + table + "))";
-				
-				orderMustSendFinish[table]=false;
-			}
-			else			
-				orderMustSendFinish[table]=true;
+
+				orderMustSendFinish[table] = false;
+			} else
+				orderMustSendFinish[table] = true;
 		}
 
 		return history;
