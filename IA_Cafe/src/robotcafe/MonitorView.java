@@ -29,6 +29,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 
 import xclipsjni.ClipsView;
 import xclipsjni.ControlPanel;
@@ -220,6 +221,7 @@ public class MonitorView extends ClipsView implements Observer {
 																		// il
 																		// timeleft
 		String[][] mapString = model.getMap();
+		String[][] mapTabString = model.getMapTab();
 
 		int x = mapString.length;
 		int y = mapString[0].length;
@@ -255,6 +257,10 @@ public class MonitorView extends ClipsView implements Observer {
 				icon = new ImageIcon(image);
 				map[i][j] = new JLabel(icon);
 				map[i][j].setToolTipText("(" + (i + 1) + ", " + (j + 1) + ")");
+				if(mapString[i][j].equals("Table")){
+					map[i][j].setText(mapTabString[i][j]);
+					map[i][j].setHorizontalTextPosition(SwingConstants.CENTER);
+				}
 				mapPanel.add(map[i][j]);
 			}
 		}

@@ -17,6 +17,7 @@ import xclipsjni.ClipsModel;
 public class MonitorModel extends ClipsModel {
 
     private String[][] map;
+    private String[][] map_tab;
     private String direction;
     private int durlastact;
     private Integer time;
@@ -85,6 +86,18 @@ public class MonitorModel extends ClipsModel {
                 map[r - 1][c - 1] = mp[i][2];
                 //System.out.println(mp[i][2]);  // COMMENTAMI
             }
+            
+            String[] array_tab = {"pos-r", "pos-c", "table-id"};
+            String[][] mp_tab = core.findAllFacts("MAIN", "Table", "TRUE", array_tab);
+            map_tab = new String[maxr][maxc];
+            for (int i = 0; i < mp_tab.length; i++) {
+                int r = new Integer(mp_tab[i][0]);
+                int c = new Integer(mp_tab[i][1]);
+                map_tab[r - 1][c - 1] = mp_tab[i][2];
+                //System.out.println(mp[i][2]);  // COMMENTAMI
+            }
+            
+            
             DebugFrame.appendText("[SYSTEM] Il modello è pronto."); 
             
         } catch (ClipsException ex) {
@@ -272,6 +285,15 @@ public class MonitorModel extends ClipsModel {
      */
     public synchronized String[][] getMap() {
         return map;
+    }
+    
+    /**
+     * metodo per ottenere la mappa degli identificatori dei tavoli.
+     *
+     * @return la mappa come matrice di stringhe
+     */
+    public synchronized String[][] getMapTab() {
+        return map_tab;
     }
 
     /**
