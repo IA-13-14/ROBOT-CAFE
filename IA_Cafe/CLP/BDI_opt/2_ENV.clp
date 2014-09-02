@@ -77,6 +77,10 @@
         (slot drink)
 )
 
+(deftemplate ordercompleted ;// per gestire la finish dopo x step dal completamento dell'ordine
+		(slot table)
+		(slot step)
+)
 
 ;// DEFRULE
 
@@ -292,7 +296,10 @@
 (defrule neworder1    
     (declare (salience 200))
     (status (step ?i) (time ?t))
-?f1<-   (event (step ?i) (type request) (source ?tb) (food ?nf) (drink ?nd))
+?f1<-   (event (step ?ri&:(<= ?ri ?i)) (type request) (source ?tb) (food ?nf) (drink ?nd)) ;Check also if previous orders can be applied later
+	;Find oldest request
+	(not (event (step ?rib&:(< ?rib ?ri)) (type request) (source ?tb)))
+	
     (tablestatus (step ?i) (table-id ?tb) (clean yes))
         (not (orderstatus (step ?i) (requested-by ?tb))) 
 => 
@@ -312,8 +319,12 @@
 
 (defrule neworder2     
     (declare (salience 200))
-    (status (step ?i) (time ?t))
-?f1<-   (event (step ?i) (type request) (source ?tb) (food ?nf) (drink ?nd))
+    (status (step ?i) (time ?t))    	
+?f1<-   (event (step ?ri&:(<= ?ri ?i)) (type request) (source ?tb) (food ?nf) (drink ?nd)) ;Check also if previous orders can be applied later
+	;Find oldest request
+	(not (event (step ?rib&:(< ?rib ?ri)) (type request) (source ?tb)))
+	(not (orderstatus (step ?i) (requested-by ?tb))) 
+	
     (tablestatus (step ?i) (table-id ?tb) (clean no))
         (cleanstatus (step ?i) (arrivaltime ?tt&:(< ?tt ?t)) (requested-by ?tb))
 => 
@@ -333,9 +344,11 @@
 
  
 (defrule newfinish      
-    (declare (salience 200))
+    (declare (salience 8))
     (status (step ?i) (time ?t))
-?f1<-   (event (step ?i) (type finish) (source ?tb))
+?f1<-   (event (step ?fi) (type finish) (source ?tb))
+?f2<-	(ordercompleted (table ?tb) (step ?oci&:(>= (- ?i ?oci) ?fi))) ;finish step >= current step - order completed step
+		(not (msg-to-agent (step ?i))) ;one request at a time, postpone finish if order msg has been sent in this step
     (tablestatus (step ?i) (table-id ?tb) (clean no))
         (not (cleanstatus (step ?i) (arrivaltime ?tt&:(< ?tt ?t)) (requested-by ?tb))) ;non c'� gi� stato un finish
         (not (orderstatus (step ?i) (time ?t) (requested-by ?tb)))   ;l'ordine � stato completato
@@ -345,6 +358,7 @@
                 (msg-to-agent (request-time ?t) (step ?i) (sender ?tb) (type finish))
     )
     (retract ?f1)
+    (retract ?f2)
     (printout t crlf " ENVIRONMENT:" crlf)
     (printout t " - " ?tb " declares finish " crlf)
 )
@@ -1502,6 +1516,7 @@
 ?f1 <-  (orderstatus (step ?i) (requested-by ?tb) (food-order ?nfo) (food-deliv ?dfo&:(= ?dfo ?nfo))
                      (drink-order ?ndo) (drink-deliv ?ddo&:(= ?ddo  ?ndo)))
 =>    (retract ?f1)
+	  (assert (ordercompleted (table ?tb) (step ?i)))
 )
 (defrule perc-load-generation1
         (declare (salience 19))
