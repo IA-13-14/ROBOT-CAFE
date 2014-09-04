@@ -286,7 +286,8 @@ public class MonitorView extends ClipsView implements Observer {
 					Font font = new Font(labelFont.getName(), Font.PLAIN, fontSizeToUse);
 					
 					map[i][j].setFont(font);
-				}
+				}				
+				
 				mapPanel.add(map[i][j]);
 			}
 		}
@@ -425,6 +426,9 @@ public class MonitorView extends ClipsView implements Observer {
 			BufferedImage background;
 			BufferedImage robot;
 
+			if(!cellData.contains("Table"))
+				map[i][j].setText("");
+			
 			// cerca se, nei primi 6 caratteri (se ce ne sono almeno 6),
 			// c'è la stringa "agent_", vedere metodo updateMap in
 			// MonitorModel.java
@@ -477,6 +481,36 @@ public class MonitorView extends ClipsView implements Observer {
 									+ map_img.get(person_info[0] + "_"
 											+ person_info[1]));
 				}
+				
+				//Disegna numero tavolo in sovraimpressione
+				if(person_info[2]!=null){
+					map[i][j].setText(person_info[2]);
+					
+					map[i][j].setHorizontalTextPosition(SwingConstants.CENTER);
+					
+					//Font per disegno numero tavolo in sovraimpressione
+					JLabel label = map[i][j];
+					Font labelFont = label.getFont();
+					String labelText = label.getText();
+
+					int stringWidth = label.getFontMetrics(labelFont).stringWidth(labelText);
+					int componentWidth = cellDimension;
+
+					// Find out how much the font can grow in width.
+					double widthRatio = (double)componentWidth / (double)stringWidth;
+
+					int newFontSize = (int)(labelFont.getSize() * widthRatio);
+					int componentHeight = cellDimension;
+
+					// Pick a new font size so it will not be larger than the height of label.
+					int fontSizeToUse = (int) (Math.min(newFontSize, componentHeight) * 0.5);
+
+					// Set the label's font size to the newly determined size.
+					Font font = new Font(labelFont.getName(), Font.PLAIN, fontSizeToUse);
+					
+					map[i][j].setFont(font);
+				}
+				
 				// Imposta il tooltip
 				map[i][j].setToolTipText("Client " + person_info[2] + " " + "("
 						+ (i + 1) + ", " + (j + 1) + ")");
