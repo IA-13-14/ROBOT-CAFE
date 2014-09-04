@@ -10,7 +10,6 @@
 (RecyclableBasket (RB-id RB2) (pos-r 2) (pos-c 2))
 (FoodDispenser  (FD-id FD1) (pos-r 4) (pos-c 2))
 (DrinkDispenser  (DD-id DD1) (pos-r 7) (pos-c 6))
-(DrinkDispenser  (DD-id DD2) (pos-r 3) (pos-c 2))
 
             (prior-cell (pos-r 1) (pos-c 1) (contains Wall))
 
@@ -58,7 +57,7 @@
 
              (prior-cell (pos-r 3) (pos-c 1) (contains Wall))
 
-             (prior-cell (pos-r 3) (pos-c 2) (contains DD))
+             (prior-cell (pos-r 3) (pos-c 2) (contains Empty))
 
              (prior-cell (pos-r 3) (pos-c 3) (contains Empty))
 

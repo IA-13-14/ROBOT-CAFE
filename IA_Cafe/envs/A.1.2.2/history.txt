@@ -23,8 +23,8 @@
 	(pos-c 9)
 	(activity seated))
 		
-(event (step 10) (type request) (source T3) (food 0) (drink 3)) 
-(event (step 11) (type request) (source T2) (food 0) (drink 3)) 
+(event (step 15) (type request) (source T3) (food 0) (drink 3)) 
+(event (step 16) (type request) (source T2) (food 0) (drink 3)) 
 
 (personmove (step 2) (ident C1) (path-id P1))
 (personmove (step 1) (ident C3) (path-id P3))
