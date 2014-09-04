@@ -3,6 +3,7 @@ package robotcafe;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
@@ -15,7 +16,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -214,7 +214,8 @@ public class MonitorView extends ClipsView implements Observer {
 	 * immagine.
 	 *
 	 */
-	private void initializeMap() {
+	private void initializeMap() {		
+		
 		Integer timeLeft = model.getMaxDuration();
 
 		cp_frame.getLeftTimeTextField().setText(timeLeft.toString()); // Aggiorna
@@ -232,7 +233,7 @@ public class MonitorView extends ClipsView implements Observer {
 		if (cellDimension > DEFAULT_IMG_SIZE) {
 			cellDimension = DEFAULT_IMG_SIZE;
 		}
-
+		
 		// RelativeLayout rl = new RelativeLayout(RelativeLayout.X_AXIS, 10);
 		// rl.setFill(true);
 		mapPanelContainer = new JPanel();
@@ -257,9 +258,34 @@ public class MonitorView extends ClipsView implements Observer {
 				icon = new ImageIcon(image);
 				map[i][j] = new JLabel(icon);
 				map[i][j].setToolTipText("(" + (i + 1) + ", " + (j + 1) + ")");
+				
+				//Disegna numero tavolo in sovraimpressione
 				if(mapString[i][j].equals("Table")){
 					map[i][j].setText(mapTabString[i][j]);
+					
 					map[i][j].setHorizontalTextPosition(SwingConstants.CENTER);
+					
+					//Font per disegno numero tavolo in sovraimpressione
+					JLabel label = map[i][j];
+					Font labelFont = label.getFont();
+					String labelText = label.getText();
+
+					int stringWidth = label.getFontMetrics(labelFont).stringWidth(labelText);
+					int componentWidth = cellDimension;
+
+					// Find out how much the font can grow in width.
+					double widthRatio = (double)componentWidth / (double)stringWidth;
+
+					int newFontSize = (int)(labelFont.getSize() * widthRatio);
+					int componentHeight = cellDimension;
+
+					// Pick a new font size so it will not be larger than the height of label.
+					int fontSizeToUse = (int) (Math.min(newFontSize, componentHeight) * 0.7);
+
+					// Set the label's font size to the newly determined size.
+					Font font = new Font(labelFont.getName(), Font.PLAIN, fontSizeToUse);
+					
+					map[i][j].setFont(font);
 				}
 				mapPanel.add(map[i][j]);
 			}
