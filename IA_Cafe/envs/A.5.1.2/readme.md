@@ -1,10 +1,9 @@
-A.5.1.1: S-I Disp PCPC HLP Priority vs S-I Disp PCPC HLP
+A.7.1.2: M-I vs S-I Opt
 
 Caratteristiche:
 
-	- Ordinazioni contemporanee (Prima quelle con poche consumazioni)
-	- [Piccole su tavoli vicini e grandi su tavoli lontani]
-
+	- Ordini accomunabili (consumazioni piccole e ravvicinate nel tempo), cleantable accomunabili (ravvicinate nel tempo)
+	
 Risultati attesi:
 	
-	- S-I Disp PCPC HLP Priority migliore di S-I Disp PCPC HLP
+	- Prestazioni molto migliori per M-I, che parallelizza

@@ -1,14 +1,10 @@
-A.8.2.2: M-I PCPC vs M-I
+A.10.2.2: M-I PCPC HLP vs S-I Disp PCPC HLP
 
 Caratteristiche:
 
-	- Dispenser vicini al robot (ma fuori percorso) e lungo il percorso per i tavoli
-	- Molti muri divisori
-	- Mappa grande (30x30)
-	- PCPC
-	
-	- come A.8.1.3, ma con i PCPC all'interno della InitMap
+	- Più FD e DD
+	- ordini non accomunabili
 
 Risultati attesi:
 	
-	- tempo di caricamento azzerato, versione M-I PCPC migliore a tutti gli effetti
+	- prestazioni migliori di S-I, grazie alla miglior scelta dei dispenser

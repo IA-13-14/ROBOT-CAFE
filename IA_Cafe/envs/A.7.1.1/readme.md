@@ -1,9 +1,10 @@
-A.7.1.1: M-I vs S-I Opt
+A.9.2.1: M-I replan vs M-I pcpc
 
 Caratteristiche:
 
-	- Ordini NON accomunabili (consumazioni grandi e/o lontante nel tempo)
-	
+	- Cliente che blocca un'access cell bersaglio
+	- PCPC
+
 Risultati attesi:
 	
-	- Prestazioni analoghe
+	- Solo la versione replan riesce a proseguire (scegliendo un'altra access cell)

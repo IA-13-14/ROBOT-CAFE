@@ -1,20 +1,5 @@
-;Equidistanti
-;T2 > T1 > T6 > T5 (correct selection order)
-(event (step 5) (type request) (source T5) (food 1) (drink 1))
-(event (step 6) (type request) (source T6) (food 1) (drink 1)) 
-(event (step 7) (type request) (source T2) (food 3) (drink 3)) 
-(event (step 8) (type request) (source T1) (food 3) (drink 1)) 
-
-;Ordini grandi lontani
-;T4 > T7 > T6 > T5 (correct selection order)
-;(event (step 5) (type request) (source T5) (food 2) (drink 2))
-;(event (step 6) (type request) (source T6) (food 2) (drink 2)) 
-;(event (step 7) (type request) (source T4) (food 3) (drink 3)) 
-;(event (step 8) (type request) (source T7) (food 3) (drink 1))
-
-
-;(event (step 200) (type request) (source T3) (food 1) (drink 1))
-;T6 clean and finish should be selected before T4
-;(event (step 201) (type request) (source T4) (food 1) (drink 1))
-;(event (step 202) (type finish) (source T6)) 
-;(event (step 203) (type request) (source T6) (food 3) (drink 3))  
+(event (step 5) (type request) (source T11) (food 1) (drink 2))
+(event (step 6) (type request) (source T1) (food 2) (drink 2)) 
+ 
+(event (step 130) (type finish) (source T11)) 
+(event (step 131) (type request) (source T11) (food 1) (drink 1))
