@@ -2,6 +2,8 @@
 
 Implementazione di un robot intelligente che agisce come cameriere in un Cafe'.
 
+![Anteprima del progetto](robot-cafe-cover.png "Anteprima del progetto")
+
 I progetti ospitati sono i seguenti:
 - IA_Cafe: Console grafica per esecuzione simulazione
 - MapGenerator: Console grafica per creazione mappe
